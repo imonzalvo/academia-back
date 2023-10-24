@@ -103,24 +103,83 @@ app.get(`/clients`, async (req: Request, res: Response) => {
   res.json(result);
 });
 
-// app.put('/post/:id/views', async (req, res) => {
-//   const { id } = req.params
+app.get(`/clients/:id`, async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-//   try {
-//     const post = await prisma.post.update({
-//       where: { id: Number(id) },
-//       data: {
-//         viewCount: {
-//           increment: 1,
-//         },
-//       },
-//     })
+  const clients = await prisma.client.findFirst({
+    where: { id },
+  });
+  const result = { clients };
+  res.json(result);
+});
 
-//     res.json(post)
-//   } catch (error) {
-//     res.json({ error: `Post with ID ${id} does not exist in the database` })
-//   }
-// })
+app.post("/clients/:id/payments", async (req, res) => {
+  const { id: clientId } = req.params;
+  const { amount, date, comment } = req.body;
+
+  try {
+    const result = await prisma.payment.create({
+      data: {
+        amount,
+        date,
+        comment,
+        client: { connect: { id: clientId } },
+      },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error creating payment ${error}` });
+  }
+});
+
+app.get("/clients/:id/payments", async (req, res) => {
+  const { id: clientId } = req.params;
+
+  try {
+    const result = await prisma.payment.findMany({
+      where: { clientId },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error getting payments ${error}` });
+  }
+});
+
+app.put("/clients/:clientId/payments/:id", async (req, res) => {
+  const { id } = req.params;
+  const { amount, date, comment } = req.body;
+
+  try {
+    const result = await prisma.payment.update({
+      where: { id },
+      data: {
+        amount,
+        date,
+        comment,
+      },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error creating payment ${error}` });
+  }
+});
+
+app.delete("/clients/:clientId/payments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.payment.delete({
+      where: { id },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error creating payment` });
+  }
+});
 
 const server = app.listen(3000, () =>
   console.log(`

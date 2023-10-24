@@ -23,18 +23,30 @@ model Post {
   updatedAt DateTime? @updatedAt @map(name: "updated_at")
 }
 
+model Payment {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  amount    Int
+  date      DateTime
+  comment   String?
+  client    Client?   @relation(fields: [clientId], references: [id])
+  clientId  String?   @db.ObjectId
+  createdAt DateTime? @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+}
+
 model Client {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   lastName  String?
-  email     String   @unique
+  email     String    @unique
   address   String
   ci        String
   phone     String
   notes     String?
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  updatedAt DateTime  @updatedAt @map(name: "updated_at")
   posts     Post[]
+  payments  Payment[]
 
   @@map(name: "clients")
 }
