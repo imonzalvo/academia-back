@@ -34,19 +34,55 @@ model Payment {
   updatedAt DateTime? @updatedAt @map(name: "updated_at")
 }
 
+model PracticalExam {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  date         DateTime
+  comment      String?
+  paid         Boolean
+  notified     Boolean
+  client       Client?             @relation(fields: [clientId], references: [id])
+  clientId     String?             @db.ObjectId
+  result       PracticalExamResult @relation(fields: [examResultId], references: [id])
+  createdAt    DateTime?           @default(now()) @map(name: "created_at")
+  updatedAt    DateTime?           @updatedAt @map(name: "updated_at")
+  examResultId String              @unique @db.ObjectId
+}
+
+model PracticalExamResult {
+  id      String         @id @default(auto()) @map("_id") @db.ObjectId
+  street  Boolean
+  circuit Boolean
+  exam    PracticalExam?
+}
+
+model TheoryExam {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  date         DateTime
+  comment      String?
+  client       Client?   @relation(fields: [clientId], references: [id])
+  clientId     String?   @db.ObjectId
+  result       Boolean
+  notified     Boolean
+  createdAt    DateTime? @default(now()) @map(name: "created_at")
+  updatedAt    DateTime? @updatedAt @map(name: "updated_at")
+}
+
 model Client {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  lastName  String?
-  email     String    @unique
-  address   String
-  ci        String
-  phone     String
-  notes     String?
-  createdAt DateTime  @default(now()) @map(name: "created_at")
-  updatedAt DateTime  @updatedAt @map(name: "updated_at")
-  posts     Post[]
-  payments  Payment[]
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  lastName       String?
+  email          String?
+  address        String
+  ci             String
+  phone          String
+  secondaryPhone String?
+  notes          String?
+  createdAt      DateTime        @default(now()) @map(name: "created_at")
+  updatedAt      DateTime        @updatedAt @map(name: "updated_at")
+  posts          Post[]
+  payments       Payment[]
+  practicalExams PracticalExam[]
+  theryExams     TheoryExam[]
 
   @@map(name: "clients")
 }

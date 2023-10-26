@@ -50,7 +50,8 @@ app.post(`/signup`, async (req, res) => {
 
 app.post(`/clients`, async (req: Request, res: Response) => {
   try {
-    const { name, lastName, email, ci, phone, address, notes } = req.body;
+    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
+      req.body;
     const result = await prisma.client.create({
       data: {
         name,
@@ -60,6 +61,7 @@ app.post(`/clients`, async (req: Request, res: Response) => {
         phone,
         address,
         notes,
+        secondaryPhone,
       },
     });
     res.json(result);
@@ -70,7 +72,8 @@ app.post(`/clients`, async (req: Request, res: Response) => {
 
 app.put(`/clients/:id`, async (req: Request, res: Response) => {
   try {
-    const { name, lastName, email, ci, phone, address, notes } = req.body;
+    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
+      req.body;
     const { id } = req.params;
 
     const result = await prisma.client.update({
@@ -83,6 +86,7 @@ app.put(`/clients/:id`, async (req: Request, res: Response) => {
         phone,
         address,
         notes,
+        secondaryPhone,
       },
     });
     res.json(result);
@@ -106,31 +110,31 @@ app.get(`/clients`, async (req: Request, res: Response) => {
 app.get(`/clients/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const clients = await prisma.client.findFirst({
+  const client = await prisma.client.findFirst({
     where: { id },
+    include: {
+      payments: true,
+      practicalExams: true,
+      theryExams: true,
+    },
   });
-  const result = { clients };
-  res.json(result);
+  res.json(client);
 });
 
 app.post("/clients/:id/payments", async (req, res) => {
   const { id: clientId } = req.params;
   const { amount, date, comment } = req.body;
 
-  try {
-    const result = await prisma.payment.create({
-      data: {
-        amount,
-        date,
-        comment,
-        client: { connect: { id: clientId } },
-      },
-    });
+  const result = await prisma.payment.create({
+    data: {
+      amount,
+      date,
+      comment,
+      client: { connect: { id: clientId } },
+    },
+  });
 
-    res.json(result);
-  } catch (error) {
-    res.json({ error: `Error creating payment ${error}` });
-  }
+  res.json(result);
 });
 
 app.get("/clients/:id/payments", async (req, res) => {
@@ -147,7 +151,7 @@ app.get("/clients/:id/payments", async (req, res) => {
   }
 });
 
-app.put("/clients/:clientId/payments/:id", async (req, res) => {
+app.put("/payments/:id", async (req, res) => {
   const { id } = req.params;
   const { amount, date, comment } = req.body;
 
@@ -167,11 +171,145 @@ app.put("/clients/:clientId/payments/:id", async (req, res) => {
   }
 });
 
-app.delete("/clients/:clientId/payments/:id", async (req, res) => {
+app.delete("/payments/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
     const result = await prisma.payment.delete({
+      where: { id },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error creating payment` });
+  }
+});
+
+// Exams
+
+app.post(
+  "/clients/:id/practical_exams",
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { date, paid, comment, notified, result } = req.body;
+    console.log("params", id);
+
+    const response = await prisma.practicalExam.create({
+      data: {
+        paid,
+        date,
+        comment,
+        notified,
+        result: {
+          create: {
+            street: result.street,
+            circuit: result.circuit,
+          },
+        },
+        client: { connect: { id: id } },
+      },
+      include: {
+        result: true,
+      },
+    });
+
+    res.json(response);
+  }
+);
+
+app.put(
+  "/clients/:clientId/practical_exams/:id",
+  async (req: Request, res: Response) => {
+    const { id: examId } = req.params;
+    const { date, paid, comment, notified, result } = req.body;
+
+    let basicData = {
+      paid,
+      date,
+      comment,
+      notified,
+    };
+    let updatedData;
+
+    if (!result) {
+      updatedData = { ...basicData };
+    } else {
+      updatedData = {
+        ...basicData,
+        result: {
+          create: {
+            street: result.street,
+            circuit: result.circuit,
+          },
+        },
+      };
+    }
+
+    const response = await prisma.practicalExam.update({
+      where: { id: examId },
+      data: updatedData,
+      include: {
+        result: true,
+      },
+    });
+
+    res.json(response);
+  }
+);
+
+app.delete("/practical_exams/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.practicalExam.delete({
+      where: { id },
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error creating payment` });
+  }
+});
+
+// Exams
+
+app.post("/clients/:id/theory_exams", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { date, comment, notified, result } = req.body;
+
+  const response = await prisma.theoryExam.create({
+    data: {
+      date,
+      comment,
+      notified,
+      result,
+      client: { connect: { id: id } },
+    },
+  });
+
+  res.json(response);
+});
+
+app.put(
+  "/clients/:clientId/theory_exams/:id",
+  async (req: Request, res: Response) => {
+    const { id: examId } = req.params;
+    const { date, comment, notified, result } = req.body;
+
+    const response = await prisma.theoryExam.update({
+      where: { id: examId },
+      data: { date, comment, notified, result },
+    });
+
+    res.json(response);
+  }
+);
+
+app.delete("/theory_exams/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.theoryExam.delete({
       where: { id },
     });
 
