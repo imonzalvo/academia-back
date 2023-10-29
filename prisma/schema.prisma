@@ -39,6 +39,7 @@ model PracticalExam {
   date         DateTime
   comment      String?
   paid         Boolean
+  time         String?
   notified     Boolean
   client       Client?             @relation(fields: [clientId], references: [id])
   clientId     String?             @db.ObjectId
@@ -46,6 +47,7 @@ model PracticalExam {
   createdAt    DateTime?           @default(now()) @map(name: "created_at")
   updatedAt    DateTime?           @updatedAt @map(name: "updated_at")
   examResultId String              @unique @db.ObjectId
+  status       Status?             @default(PENDING)
 }
 
 model PracticalExamResult {
@@ -56,15 +58,22 @@ model PracticalExamResult {
 }
 
 model TheoryExam {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  date         DateTime
-  comment      String?
-  client       Client?   @relation(fields: [clientId], references: [id])
-  clientId     String?   @db.ObjectId
-  result       Boolean
-  notified     Boolean
-  createdAt    DateTime? @default(now()) @map(name: "created_at")
-  updatedAt    DateTime? @updatedAt @map(name: "updated_at")
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  date      DateTime
+  comment   String?
+  client    Client?   @relation(fields: [clientId], references: [id])
+  clientId  String?   @db.ObjectId
+  result    Boolean
+  time      String?
+  notified  Boolean
+  createdAt DateTime? @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  status    Status?   @default(PENDING)
+}
+
+enum Status {
+  CANCELED
+  PENDING
 }
 
 model Client {
@@ -82,7 +91,7 @@ model Client {
   posts          Post[]
   payments       Payment[]
   practicalExams PracticalExam[]
-  theryExams     TheoryExam[]
+  theoryExams    TheoryExam[]
 
   @@map(name: "clients")
 }

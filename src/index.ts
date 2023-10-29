@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import express, { Express, Request, Response } from "express";
+import ValidationError from "./errors/validationError";
 
 const prisma = new PrismaClient();
 const app: Express = express();
@@ -114,11 +115,24 @@ app.get(`/clients/:id`, async (req: Request, res: Response) => {
     where: { id },
     include: {
       payments: true,
-      practicalExams: true,
-      theryExams: true,
+      practicalExams: {
+        include: {
+          result: true,
+        },
+        orderBy: {
+          date: "desc",
+        },
+      },
+      theoryExams: true,
     },
   });
-  res.json(client);
+
+  const pendingPracticalExam = client.practicalExams.filter((exam) => {
+    return new Date(exam.date) > new Date() && exam.status == "PENDING";
+  })[0];
+
+  const response = { ...client, pendingPracticalExam };
+  res.json(response);
 });
 
 app.post("/clients/:id/payments", async (req, res) => {
@@ -189,73 +203,98 @@ app.delete("/payments/:id", async (req, res) => {
 
 app.post(
   "/clients/:id/practical_exams",
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next) => {
     const { id } = req.params;
-    const { date, paid, comment, notified, result } = req.body;
-    console.log("params", id);
+    console.log("params", id, req.body);
 
-    const response = await prisma.practicalExam.create({
-      data: {
-        paid,
-        date,
-        comment,
-        notified,
-        result: {
-          create: {
-            street: result.street,
-            circuit: result.circuit,
+    const { date, paid, comment, notified, result, time } = req.body;
+    try {
+      const parsedDate = new Date(date);
+      const now = new Date();
+      if (parsedDate.getTime() <= now.getTime()) {
+        throw new ValidationError("La fecha no puede ser anterior a hoy");
+      }
+
+      const futureExams = await prisma.practicalExam.findFirst({
+        where: {
+          clientId: id,
+          status: "PENDING",
+          date: {
+            gte: new Date(),
           },
         },
-        client: { connect: { id: id } },
-      },
-      include: {
-        result: true,
-      },
-    });
+      });
 
-    res.json(response);
-  }
-);
+      if (!!futureExams) {
+        throw new ValidationError("Ya hay un examen practico agendado");
+      }
 
-app.put(
-  "/clients/:clientId/practical_exams/:id",
-  async (req: Request, res: Response) => {
-    const { id: examId } = req.params;
-    const { date, paid, comment, notified, result } = req.body;
-
-    let basicData = {
-      paid,
-      date,
-      comment,
-      notified,
-    };
-    let updatedData;
-
-    if (!result) {
-      updatedData = { ...basicData };
-    } else {
-      updatedData = {
-        ...basicData,
-        result: {
-          create: {
-            street: result.street,
-            circuit: result.circuit,
+      const response = await prisma.practicalExam.create({
+        data: {
+          paid,
+          date,
+          comment,
+          notified,
+          time,
+          status: "PENDING",
+          result: {
+            create: {
+              street: result.street,
+              circuit: result.circuit,
+            },
           },
+          client: { connect: { id: id } },
         },
-      };
+        include: {
+          result: true,
+        },
+      });
+
+      res.json(response);
+    } catch (e) {
+      return next(e);
     }
-
-    const response = await prisma.practicalExam.update({
-      where: { id: examId },
-      data: updatedData,
-      include: {
-        result: true,
-      },
-    });
-
-    res.json(response);
   }
 );
+
+app.put("/practical_exams/:id", async (req: Request, res: Response) => {
+  const { id: examId } = req.params;
+  const { date, paid, comment, notified, result, time, status } = req.body;
+
+  let basicData = {
+    paid,
+    date,
+    comment,
+    notified,
+    time,
+    status,
+  };
+  let updatedData;
+
+  if (!result) {
+    updatedData = { ...basicData };
+  } else {
+    updatedData = {
+      ...basicData,
+      result: {
+        create: {
+          street: result.street,
+          circuit: result.circuit,
+        },
+      },
+    };
+  }
+
+  const response = await prisma.practicalExam.update({
+    where: { id: examId },
+    data: updatedData,
+    include: {
+      result: true,
+    },
+  });
+
+  res.json(response);
+});
 
 app.delete("/practical_exams/:id", async (req, res) => {
   const { id } = req.params;
@@ -317,6 +356,11 @@ app.delete("/theory_exams/:id", async (req, res) => {
   } catch (error) {
     res.json({ error: `Error creating payment` });
   }
+});
+
+app.use((err, req, res, next) => {
+  console.log("hola??", err);
+  res.status(err.status || 500).send(err);
 });
 
 const server = app.listen(3000, () =>
