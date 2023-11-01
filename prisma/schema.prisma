@@ -10,19 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  content   String?
-  published Boolean   @default(false)
-  client    Client?   @relation(fields: [clientId], references: [id])
-  clientId  String?   @db.ObjectId
-  User      User?     @relation(fields: [userId], references: [id])
-  userId    String?   @db.ObjectId
-  createdAt DateTime? @default(now()) @map(name: "created_at")
-  updatedAt DateTime? @updatedAt @map(name: "updated_at")
-}
-
 model Payment {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   amount    Int
@@ -76,6 +63,19 @@ enum Status {
   PENDING
 }
 
+model Class {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  date       DateTime
+  comment    String?
+  client     Client?   @relation(fields: [clientId], references: [id])
+  clientId   String?   @db.ObjectId
+  time       String?
+  notified   Boolean?
+  instructor String?
+  createdAt  DateTime? @default(now()) @map(name: "created_at")
+  updatedAt  DateTime? @updatedAt @map(name: "updated_at")
+}
+
 model Client {
   id             String          @id @default(auto()) @map("_id") @db.ObjectId
   name           String
@@ -88,10 +88,10 @@ model Client {
   notes          String?
   createdAt      DateTime        @default(now()) @map(name: "created_at")
   updatedAt      DateTime        @updatedAt @map(name: "updated_at")
-  posts          Post[]
   payments       Payment[]
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]
+  classes        Class[]
 
   @@map(name: "clients")
 }
@@ -136,7 +136,6 @@ model User {
   image         String?
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @updatedAt @map(name: "updated_at")
-  posts         Post[]
   accounts      Account[]
   sessions      Session[]
 

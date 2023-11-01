@@ -123,7 +123,16 @@ app.get(`/clients/:id`, async (req: Request, res: Response) => {
           date: "desc",
         },
       },
-      theoryExams: true,
+      theoryExams: {
+        orderBy: {
+          date: "desc",
+        },
+      },
+      classes: {
+        orderBy: {
+          date: "desc",
+        },
+      },
     },
   });
 
@@ -131,7 +140,20 @@ app.get(`/clients/:id`, async (req: Request, res: Response) => {
     return new Date(exam.date) > new Date() && exam.status == "PENDING";
   })[0];
 
-  const response = { ...client, pendingPracticalExam };
+  const pendingTheoryExam = client.theoryExams.filter((exam) => {
+    return new Date(exam.date) > new Date() && exam.status == "PENDING";
+  })[0];
+
+  const nextClass = client.classes.filter((exam) => {
+    return new Date(exam.date) > new Date();
+  })[0];
+
+  const response = {
+    ...client,
+    pendingPracticalExam,
+    pendingTheoryExam,
+    nextClass,
+  };
   res.json(response);
 });
 
@@ -312,49 +334,121 @@ app.delete("/practical_exams/:id", async (req, res) => {
 
 // Exams
 
-app.post("/clients/:id/theory_exams", async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { date, comment, notified, result } = req.body;
+app.post(
+  "/clients/:id/theory_exams",
+  async (req: Request, res: Response, next) => {
+    const { id } = req.params;
+    const { date, comment, notified, result, time } = req.body;
 
-  const response = await prisma.theoryExam.create({
-    data: {
-      date,
-      comment,
-      notified,
-      result,
-      client: { connect: { id: id } },
-    },
+    try {
+      const futureExams = await prisma.theoryExam.findFirst({
+        where: {
+          clientId: id,
+          status: "PENDING",
+          date: {
+            gte: new Date(),
+          },
+        },
+      });
+
+      if (!!futureExams) {
+        throw new ValidationError("Ya hay un examen teorico agendado");
+      }
+
+      const response = await prisma.theoryExam.create({
+        data: {
+          date,
+          comment,
+          notified,
+          result,
+          time,
+          client: { connect: { id: id } },
+        },
+      });
+
+      res.json(response);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
+app.put("/theory_exams/:id", async (req: Request, res: Response) => {
+  const { id: examId } = req.params;
+  const { date, comment, notified, result, time } = req.body;
+
+  const response = await prisma.theoryExam.update({
+    where: { id: examId },
+    data: { date, comment, notified, result, time },
   });
 
   res.json(response);
 });
 
-app.put(
-  "/clients/:clientId/theory_exams/:id",
-  async (req: Request, res: Response) => {
-    const { id: examId } = req.params;
-    const { date, comment, notified, result } = req.body;
-
-    const response = await prisma.theoryExam.update({
-      where: { id: examId },
-      data: { date, comment, notified, result },
-    });
-
-    res.json(response);
-  }
-);
-
 app.delete("/theory_exams/:id", async (req, res) => {
   const { id } = req.params;
 
+  const result = await prisma.theoryExam.delete({
+    where: { id },
+  });
+
+  res.json(result);
+});
+
+// Classes
+app.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
+  const { id: clientId } = req.params;
+
   try {
-    const result = await prisma.theoryExam.delete({
+    const { date, time, comment, notified, instructor } = req.body;
+    const result = await prisma.class.create({
+      data: {
+        date,
+        time,
+        comment,
+        notified,
+        instructor,
+        client: { connect: { id: clientId } },
+      },
+    });
+    res.json(result);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+app.put(`/classes/:id`, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { date, time, comment, notified, instructor } = req.body;
+
+    const result = await prisma.class.update({
+      where: { id },
+      data: {
+        date,
+        time,
+        comment,
+        notified,
+        instructor,
+      },
+    });
+    res.json(result);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+app.delete(`/classes/:id`, async (req: Request, res: Response) => {
+  console.log("id?", req.params);
+  try {
+    const { id } = req.params;
+
+    const result = await prisma.class.delete({
       where: { id },
     });
-
     res.json(result);
-  } catch (error) {
-    res.json({ error: `Error creating payment` });
+  } catch (e) {
+    res.sendStatus(500);
   }
 });
 
