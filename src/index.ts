@@ -30,25 +30,6 @@ app.use(function (req, res, next) {
 
 app.use(express.json());
 
-app.post(`/signup`, async (req, res) => {
-  const { name, email, posts } = req.body;
-
-  const postData = posts?.map((post: Prisma.PostCreateInput) => {
-    return { title: post?.title, content: post?.content };
-  });
-
-  const result = await prisma.user.create({
-    data: {
-      name,
-      email,
-      posts: {
-        create: postData,
-      },
-    },
-  });
-  res.json(result);
-});
-
 app.post(`/clients`, async (req: Request, res: Response) => {
   try {
     const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
