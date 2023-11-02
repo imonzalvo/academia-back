@@ -84,9 +84,79 @@ app.delete(`/clients/:id`, async (req: Request, res: Response) => {
 });
 
 app.get(`/clients`, async (req: Request, res: Response) => {
-  const clients = await prisma.client.findMany();
-  const result = { clients };
-  res.json(result);
+  const { skip, limit, search } = req.query;
+
+  let clients;
+
+  if (!search) {
+    const queryResult = await prisma.$transaction([
+      prisma.client.count(),
+      prisma.client.findMany({
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+    ]);
+    clients = queryResult[1];
+    const result = { data: clients, total: queryResult[0] };
+    res.json(result);
+    return;
+  }
+  clients = await prisma.client.aggregateRaw({
+    pipeline: [
+      {
+        $search: {
+          index: "default",
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: search,
+                  path: "name",
+                },
+              },
+              {
+                autocomplete: {
+                  query: search,
+                  path: "lastName",
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          id: { $toString: "$_id" },
+          createdAt: { $toString: "$created_at" },
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: parseInt(skip) }, { $limit: parseInt(limit) }],
+        },
+      },
+      {
+        $project: {
+          "data.id": 1,
+          "data.name": 1,
+          "data.lastName": 1,
+          "data.ci": 1,
+          "data.phone": 1,
+          "data.secodaryPhone": 1,
+          "data.createdAt": 1,
+          "data.address": 1,
+          "data.email": 1,
+          "data.notes": 1,
+          total: { $arrayElemAt: ["$metadata.total", 0] },
+        },
+      },
+    ],
+  });
+  res.json(clients[0]);
 });
 
 app.get(`/clients/:id`, async (req: Request, res: Response) => {
@@ -208,7 +278,6 @@ app.post(
   "/clients/:id/practical_exams",
   async (req: Request, res: Response, next) => {
     const { id } = req.params;
-    console.log("params", id, req.body);
 
     const { date, paid, comment, notified, result, time } = req.body;
     try {
@@ -420,7 +489,6 @@ app.put(`/classes/:id`, async (req: Request, res: Response) => {
 });
 
 app.delete(`/classes/:id`, async (req: Request, res: Response) => {
-  console.log("id?", req.params);
   try {
     const { id } = req.params;
 
@@ -434,7 +502,6 @@ app.delete(`/classes/:id`, async (req: Request, res: Response) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log("hola??", err);
   res.status(err.status || 500).send(err);
 });
 
