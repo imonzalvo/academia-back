@@ -92,8 +92,8 @@ app.get(`/clients`, async (req: Request, res: Response) => {
     const queryResult = await prisma.$transaction([
       prisma.client.count(),
       prisma.client.findMany({
-        skip: parseInt(skip),
-        take: parseInt(limit),
+        skip: parseInt(skip as string),
+        take: parseInt(limit as string),
         orderBy: {
           createdAt: "desc",
         },
@@ -136,7 +136,10 @@ app.get(`/clients`, async (req: Request, res: Response) => {
       {
         $facet: {
           metadata: [{ $count: "total" }],
-          data: [{ $skip: parseInt(skip) }, { $limit: parseInt(limit) }],
+          data: [
+            { $skip: parseInt(skip as string) },
+            { $limit: parseInt(limit as string) },
+          ],
         },
       },
       {
