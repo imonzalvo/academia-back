@@ -1,9 +1,7 @@
 // import { Prisma, PrismaClient } from "@prisma/client";
-import express, { Express, Request, Response } from "express";
-import ValidationError from "./errors/validationError";
-import prisma from "./lib/db";
+import express, { Express } from "express";
 import router from "./routes";
-// const prisma = new PrismaClient();
+
 const app: Express = express();
 app.use(function (req, res, next) {
   // Website you wish to allow to connect
