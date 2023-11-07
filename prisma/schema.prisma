@@ -61,6 +61,7 @@ model TheoryExam {
 enum Status {
   CANCELED
   PENDING
+  DONE
 }
 
 model Class {
@@ -72,6 +73,7 @@ model Class {
   time       String?
   notified   Boolean?
   instructor String?
+  status     Status?   @default(PENDING)
   createdAt  DateTime? @default(now()) @map(name: "created_at")
   updatedAt  DateTime? @updatedAt @map(name: "updated_at")
 }

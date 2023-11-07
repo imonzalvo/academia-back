@@ -7,7 +7,7 @@ router.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
   const { id: clientId } = req.params;
 
   try {
-    const { date, time, comment, notified, instructor } = req.body;
+    const { date, time, comment, notified, instructor, status } = req.body;
     const result = await prisma.class.create({
       data: {
         date,
@@ -15,6 +15,7 @@ router.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
         comment,
         notified,
         instructor,
+        status,
         client: { connect: { id: clientId } },
       },
     });
@@ -27,7 +28,7 @@ router.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
 router.put(`/classes/:id`, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { date, time, comment, notified, instructor } = req.body;
+    const { date, time, comment, notified, instructor, status } = req.body;
 
     const result = await prisma.class.update({
       where: { id },
@@ -37,6 +38,7 @@ router.put(`/classes/:id`, async (req: Request, res: Response) => {
         comment,
         notified,
         instructor,
+        status,
       },
     });
     res.json(result);
