@@ -8,7 +8,7 @@ router.post(
   "/clients/:id/theory_exams",
   async (req: Request, res: Response, next) => {
     const { id } = req.params;
-    const { date, comment, notified, result, time } = req.body;
+    const { date, comment, notified, result, time, status } = req.body;
 
     const theoryExam = {
       date,
@@ -17,6 +17,7 @@ router.post(
       result,
       time,
       clientId: id,
+      status,
     };
 
     try {
@@ -31,11 +32,11 @@ router.post(
 
 router.put("/theory_exams/:id", async (req: Request, res: Response) => {
   const { id: examId } = req.params;
-  const { date, comment, notified, result, time } = req.body;
+  const { date, comment, notified, result, time, status } = req.body;
 
   const response = await prisma.theoryExam.update({
     where: { id: examId },
-    data: { date, comment, notified, result, time },
+    data: { date, comment, notified, result, time, status },
   });
 
   res.json(response);

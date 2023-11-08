@@ -8,7 +8,7 @@ router.post(
   async (req: Request, res: Response, next) => {
     const { id } = req.params;
 
-    const { date, paid, comment, notified, result, time } = req.body;
+    const { date, paid, comment, notified, result, time, status } = req.body;
 
     const newPayment = {
       date,
@@ -17,6 +17,7 @@ router.post(
       notified,
       result,
       time,
+      status,
       clientId: id,
     };
 
