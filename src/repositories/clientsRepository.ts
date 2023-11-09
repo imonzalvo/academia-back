@@ -92,9 +92,7 @@ const deleteClient = async (id: string) => {
   return result;
 };
 
-const getAll = async (
-  paginationOptions: PaginationOptions
-): Promise<ClientSearch> => {
+const getAll = async (paginationOptions: PaginationOptions) => {
   const queryResult = await prisma.$transaction([
     prisma.client.count(),
     prisma.client.findMany({
@@ -112,10 +110,7 @@ const getAll = async (
   return { data: clients, total };
 };
 
-const search = async (
-  paginationOptions: PaginationOptions,
-  search: string
-): Promise<ClientSearch> => {
+const search = async (paginationOptions: PaginationOptions, search: string) => {
   const whereClause = {
     OR: [
       {
