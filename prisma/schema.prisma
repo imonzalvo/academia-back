@@ -107,7 +107,6 @@ model Client {
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]
   classes        Class[]
-  status         ClientStatus?   @default(ACTIVE)
 
   @@map(name: "clients")
 }
