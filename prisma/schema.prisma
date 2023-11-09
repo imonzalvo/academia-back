@@ -11,14 +11,20 @@ datasource db {
 }
 
 model Payment {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
   amount    Int
   date      DateTime
   comment   String?
-  client    Client?   @relation(fields: [clientId], references: [id])
-  clientId  String?   @db.ObjectId
-  createdAt DateTime? @default(now()) @map(name: "created_at")
-  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  type      PaymentType? @default(MONEY)
+  client    Client?      @relation(fields: [clientId], references: [id])
+  clientId  String?      @db.ObjectId
+  createdAt DateTime?    @default(now()) @map(name: "created_at")
+  updatedAt DateTime?    @updatedAt @map(name: "updated_at")
+}
+
+enum PaymentType {
+  MONEY
+  CLASS
 }
 
 model PracticalExam {
@@ -64,6 +70,12 @@ enum Status {
   DONE
 }
 
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  DONE
+}
+
 model Class {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   date       DateTime
@@ -95,6 +107,7 @@ model Client {
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]
   classes        Class[]
+  status         ClientStatus?   @default(ACTIVE)
 
   @@map(name: "clients")
 }

@@ -5,7 +5,7 @@ const router = Router();
 
 router.put("/payments/:id", async (req, res) => {
   const { id } = req.params;
-  const { amount, date, comment } = req.body;
+  const { amount, date, comment, type } = req.body;
 
   try {
     const result = await prisma.payment.update({
@@ -14,6 +14,7 @@ router.put("/payments/:id", async (req, res) => {
         amount,
         date,
         comment,
+        type
       },
     });
 

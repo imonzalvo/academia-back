@@ -6,8 +6,18 @@ const router = Router();
 
 router.post(`/clients`, async (req: Request, res: Response) => {
   try {
-    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
-      req.body;
+    const {
+      name,
+      lastName,
+      email,
+      ci,
+      phone,
+      address,
+      notes,
+      secondaryPhone,
+      status,
+    } = req.body;
+
     const result = await prisma.client.create({
       data: {
         name,
@@ -18,6 +28,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
         address,
         notes,
         secondaryPhone,
+        status,
       },
     });
     res.json(result);
@@ -28,8 +39,17 @@ router.post(`/clients`, async (req: Request, res: Response) => {
 
 router.put(`/clients/:id`, async (req: Request, res: Response) => {
   try {
-    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
-      req.body;
+    const {
+      name,
+      lastName,
+      email,
+      ci,
+      phone,
+      address,
+      notes,
+      secondaryPhone,
+      status,
+    } = req.body;
     const { id } = req.params;
 
     const result = await prisma.client.update({
@@ -43,6 +63,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
         address,
         notes,
         secondaryPhone,
+        status,
       },
     });
     res.json(result);
@@ -164,7 +185,6 @@ router.get(`/clients/:id`, async (req: Request, res: Response) => {
     },
   });
 
-  // console.log("hola?", prisma)
   const pendingPracticalExam = client.practicalExams.filter((exam) => {
     return new Date(exam.date) > new Date() && exam.status == "PENDING";
   })[0];
@@ -188,13 +208,14 @@ router.get(`/clients/:id`, async (req: Request, res: Response) => {
 
 router.post("/clients/:id/payments", async (req, res) => {
   const { id: clientId } = req.params;
-  const { amount, date, comment } = req.body;
+  const { amount, date, comment, type } = req.body;
 
   const result = await prisma.payment.create({
     data: {
       amount,
       date,
       comment,
+      type,
       client: { connect: { id: clientId } },
     },
   });
