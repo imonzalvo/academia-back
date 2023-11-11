@@ -43,6 +43,7 @@ const findNextExams = async (paginationOptions: PaginationOptions) => {
         date: "asc",
       },
       include: {
+        result: true,
         client: {
           select: {
             name: true,
