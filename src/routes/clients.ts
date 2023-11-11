@@ -8,8 +8,17 @@ const router = Router();
 
 router.post(`/clients`, async (req: Request, res: Response) => {
   try {
-    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
-      req.body;
+    const {
+      name,
+      lastName,
+      email,
+      ci,
+      phone,
+      address,
+      notes,
+      secondaryPhone,
+      status,
+    } = req.body;
 
     const newClient: ICreateClient = {
       name,
@@ -20,6 +29,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       address,
       notes,
       secondaryPhone,
+      status,
     };
 
     const result = await clientsService.create(newClient);
@@ -32,8 +42,17 @@ router.post(`/clients`, async (req: Request, res: Response) => {
 router.put(`/clients/:id`, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, lastName, email, ci, phone, address, notes, secondaryPhone } =
-      req.body;
+    const {
+      name,
+      lastName,
+      email,
+      ci,
+      phone,
+      address,
+      notes,
+      secondaryPhone,
+      status,
+    } = req.body;
 
     const updatedClient: Partial<ICreateClient> = {
       id,
@@ -45,6 +64,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       address,
       notes,
       secondaryPhone,
+      status,
     };
 
     const result = await clientsService.update(updatedClient);

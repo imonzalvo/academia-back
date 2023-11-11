@@ -84,4 +84,21 @@ router.delete("/practical_exams/:id", async (req, res) => {
   }
 });
 
+router.get("/practical_exams/upcoming", async (req, res) => {
+  const { skip, limit } = req.query;
+
+  const skipNumber = parseInt(skip as string);
+  const limitNumber = parseInt(limit as string);
+
+  try {
+    const payments = await practicalExamsService.findNextExams(
+      skipNumber,
+      limitNumber
+    );
+    res.json(payments);
+  } catch (error) {
+    res.json({ error: `Error getting upcoming practical exams ${error}` });
+  }
+});
+
 export default router;

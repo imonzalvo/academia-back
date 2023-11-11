@@ -52,4 +52,21 @@ router.delete("/theory_exams/:id", async (req, res) => {
   res.json(result);
 });
 
+router.get("/theory_exams/upcoming", async (req, res) => {
+  const { skip, limit } = req.query;
+
+  const skipNumber = parseInt(skip as string);
+  const limitNumber = parseInt(limit as string);
+
+  try {
+    const payments = await theoryExamsService.findNextExams(
+      skipNumber,
+      limitNumber
+    );
+    res.json(payments);
+  } catch (error) {
+    res.json({ error: `Error getting upcoming theory exams ${error}` });
+  }
+});
+
 export default router;

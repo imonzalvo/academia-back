@@ -1,7 +1,22 @@
 import { Router, Request, Response } from "express";
 import prisma from "../lib/db";
+import paymentsService from "../services/paymentsService";
 
 const router = Router();
+
+router.get("/payments", async (req, res) => {
+  const { skip, limit } = req.query;
+
+  const skipNumber = parseInt(skip as string);
+  const limitNumber = parseInt(limit as string);
+
+  try {
+    const payments = await paymentsService.getAll(skipNumber, limitNumber);
+    res.json(payments);
+  } catch (error) {
+    res.json({ error: `Error getting payments ${error}` });
+  }
+});
 
 router.put("/payments/:id", async (req, res) => {
   const { id } = req.params;
@@ -14,7 +29,7 @@ router.put("/payments/:id", async (req, res) => {
         amount,
         date,
         comment,
-        type
+        type,
       },
     });
 

@@ -30,4 +30,8 @@ const create = async (newTheoryExam: ICreateTheoryExam) => {
   return createdExam;
 };
 
-export default { create };
+const findNextExams = async (skip: number, limit: number) => {
+  return await theoryExamsRepository.findNextExams({ skip, limit });
+};
+
+export default { create, findNextExams };

@@ -70,12 +70,6 @@ enum Status {
   DONE
 }
 
-enum ClientStatus {
-  ACTIVE
-  INACTIVE
-  DONE
-}
-
 model Class {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   date       DateTime
@@ -107,8 +101,15 @@ model Client {
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]
   classes        Class[]
+  status         ClientStatus?   @default(ACTIVE)
 
   @@map(name: "clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  DONE
 }
 
 model Session {

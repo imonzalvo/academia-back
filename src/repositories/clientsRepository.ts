@@ -1,5 +1,6 @@
-import { Client, Prisma } from "@prisma/client";
+import { Client, Prisma, ClientStatus } from "@prisma/client";
 import prisma from "../lib/db";
+import { PaginationOptions } from "./types";
 
 export interface ICreateClient {
   id?: string;
@@ -11,11 +12,7 @@ export interface ICreateClient {
   address: string;
   notes: string;
   secondaryPhone: string;
-}
-
-interface PaginationOptions {
-  limit: number;
-  skip: number;
+  status: "DONE" | "ACTIVE" | "INACTIVE";
 }
 
 interface ClientSearch {
@@ -34,6 +31,7 @@ const create = async (newClient: ICreateClient) => {
       address: newClient.address,
       notes: newClient.notes,
       secondaryPhone: newClient.secondaryPhone,
+      status: newClient.status,
     },
   });
 
@@ -81,6 +79,7 @@ const update = async (updatedClient: Partial<ICreateClient>) => {
       address: updatedClient.address,
       notes: updatedClient.notes,
       secondaryPhone: updatedClient.secondaryPhone,
+      status: updatedClient.status,
     },
   });
 
@@ -93,9 +92,15 @@ const deleteClient = async (id: string) => {
 };
 
 const getAll = async (paginationOptions: PaginationOptions) => {
+  const whereClause = {
+    status: {
+      in: ["ACTIVE" as ClientStatus],
+    },
+  };
   const queryResult = await prisma.$transaction([
-    prisma.client.count(),
+    prisma.client.count({ where: whereClause }),
     prisma.client.findMany({
+      where: whereClause,
       skip: paginationOptions.skip,
       take: paginationOptions.limit,
       orderBy: {
@@ -111,7 +116,13 @@ const getAll = async (paginationOptions: PaginationOptions) => {
 };
 
 const search = async (paginationOptions: PaginationOptions, search: string) => {
-  const whereClause = {
+  const activeCientClause = {
+    status: {
+      in: ["ACTIVE" as ClientStatus],
+    },
+  };
+
+  const searchClause = {
     OR: [
       {
         name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
@@ -127,10 +138,10 @@ const search = async (paginationOptions: PaginationOptions, search: string) => {
 
   const queryResult = await prisma.$transaction([
     prisma.client.count({
-      where: whereClause,
+      where: { AND: [searchClause] },
     }),
     prisma.client.findMany({
-      where: whereClause,
+      where: { AND: [searchClause] },
       skip: paginationOptions.skip,
       take: paginationOptions.limit,
       orderBy: {

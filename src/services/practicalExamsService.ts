@@ -34,6 +34,11 @@ const create = async (newPracticalExam: ICreatePracticalExam) => {
   return createdPayment;
 };
 
+const findNextExams = async (skip: number, limit: number) => {
+  return await practicalExamsRepository.findNextExams({ skip, limit });
+};
+
 export default {
   create,
+  findNextExams
 };

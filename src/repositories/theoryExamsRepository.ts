@@ -1,4 +1,6 @@
+import { Status } from "@prisma/client";
 import prisma from "../lib/db";
+import { PaginationOptions } from "./types";
 
 export interface ICreateTheoryExam {
   clientId: string;
@@ -38,7 +40,41 @@ const create = async (exam: ICreateTheoryExam) => {
   return newExam;
 };
 
+const findNextExams = async (paginationOptions: PaginationOptions) => {
+  const whereClause = {
+    status: "PENDING" as Status,
+    date: {
+      gt: new Date(),
+    },
+  };
+  const queryResult = await prisma.$transaction([
+    prisma.theoryExam.count(),
+    prisma.theoryExam.findMany({
+      where: whereClause,
+      skip: paginationOptions.skip,
+      take: paginationOptions.limit,
+      orderBy: {
+        date: "asc",
+      },
+      include: {
+        client: {
+          select: {
+            name: true,
+            lastName: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  const total = queryResult[0];
+  const theoryExams = queryResult[1];
+
+  return { data: theoryExams, total };
+};
+
 export default {
+  findNextExams,
   findClientNext,
   create,
 };
