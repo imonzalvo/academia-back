@@ -156,6 +156,20 @@ const search = async (paginationOptions: PaginationOptions, search: string) => {
   return { data: clients, total };
 };
 
+const getNewClientsByDate = async (from: Date, to: Date) => {
+  const queryResult = await prisma.client.findMany({
+    where: {
+      createdAt: { gte: from, lte: to },
+    },
+    select: {
+      id: true,
+      createdAt: true,
+    },
+  });
+
+  return queryResult;
+};
+
 export default {
   create,
   get,
@@ -163,4 +177,5 @@ export default {
   delete: deleteClient,
   getAll,
   search,
+  getNewClientsByDate,
 };

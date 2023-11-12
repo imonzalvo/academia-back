@@ -37,5 +37,6 @@ app.use((err, req, res, next) => {
 const server = app.listen(3000, () =>
   console.log(`
 🚀 Server ready at: http://localhost:3000
+DB: ${process.env.DATABASE_URL}
 ⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api`)
 );
