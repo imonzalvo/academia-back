@@ -115,33 +115,47 @@ const getAll = async (paginationOptions: PaginationOptions) => {
   return { data: clients, total };
 };
 
-const search = async (paginationOptions: PaginationOptions, search: string) => {
-  const activeCientClause = {
-    status: {
-      in: ["ACTIVE" as ClientStatus],
-    },
-  };
+const search = async (
+  paginationOptions: PaginationOptions,
+  search: string | undefined,
+  status: ClientStatus | undefined
+) => {
+  const searchConditionsConjunction = [];
 
-  const searchClause = {
-    OR: [
-      {
-        name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
-      },
-      {
-        lastName: {
-          contains: search,
-          mode: "insensitive" as Prisma.QueryMode,
+  if (!!search) {
+    const nameSearchClause = {
+      OR: [
+        {
+          name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
         },
-      },
-    ],
+        {
+          lastName: {
+            contains: search,
+            mode: "insensitive" as Prisma.QueryMode,
+          },
+        },
+      ],
+    };
+    searchConditionsConjunction.push(nameSearchClause);
+  }
+
+  if (!!status) {
+    const statusCientClause = {
+      status: status,
+    };
+    searchConditionsConjunction.push(statusCientClause);
+  }
+
+  const whereClause = {
+    AND: searchConditionsConjunction,
   };
 
   const queryResult = await prisma.$transaction([
     prisma.client.count({
-      where: { AND: [searchClause] },
+      where: whereClause,
     }),
     prisma.client.findMany({
-      where: { AND: [searchClause] },
+      where: whereClause,
       skip: paginationOptions.skip,
       take: paginationOptions.limit,
       orderBy: {

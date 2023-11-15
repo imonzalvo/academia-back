@@ -81,7 +81,12 @@ router.delete(`/clients/:id`, async (req: Request, res: Response) => {
 });
 
 router.get(`/clients`, async (req: Request, res: Response) => {
-  const { skip, limit, search } = req.query;
+  const { skip, limit, search, status } = req.query;
+
+  if (!!status && !["ACTIVE", "INACTIVE", "DONE"].includes(status as string)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
 
   const skipNumber = parseInt(skip as string);
   const limitNumber = parseInt(limit as string);
@@ -89,7 +94,8 @@ router.get(`/clients`, async (req: Request, res: Response) => {
   const clients = await clientsService.getClients(
     skipNumber,
     limitNumber,
-    search as string
+    search as string,
+    status
   );
 
   res.json(clients);

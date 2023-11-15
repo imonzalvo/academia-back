@@ -1,7 +1,7 @@
 import clientsRepository, {
   ICreateClient,
 } from "../repositories/clientsRepository";
-import type { Client, Payment } from "@prisma/client";
+import type { Client, ClientStatus, Payment } from "@prisma/client";
 
 export interface IPopulatedClient extends Client {
   nextClass: any;
@@ -48,11 +48,17 @@ const deleteClient = async (id: string) => {
   return await clientsRepository.delete(id);
 };
 
-const getClients = async (skip: number, limit: number, search: string) => {
-  if (!search) {
-    return await clientsRepository.getAll({ skip, limit });
-  }
-  return await clientsRepository.search({ skip, limit }, search);
+const getClients = async (
+  skip: number,
+  limit: number,
+  search: string,
+  status: string
+) => {
+  return await clientsRepository.search(
+    { skip, limit },
+    search,
+    status as ClientStatus
+  );
 };
 
 export default {
