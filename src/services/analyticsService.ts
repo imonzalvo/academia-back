@@ -1,6 +1,12 @@
+import classesRepository from "../repositories/classesRepository";
 import clientsRepository from "../repositories/clientsRepository";
 
 type groupBy = "DATE" | "WEEK" | "MONTH";
+
+interface DateGroupable {
+  id: string;
+  date: Date;
+}
 
 const getNewClientsCountByDate = async (
   from: Date,
@@ -9,8 +15,15 @@ const getNewClientsCountByDate = async (
 ) => {
   const newClients = await clientsRepository.getNewClientsByDate(from, to);
 
-  const groupedClients = countUserByDate(newClients);
-  const populatedGroupedClients = completeGroupedClientsCount(
+  const formattedNewClients = newClients.map((client) => {
+    return {
+      ...client,
+      date: client.createdAt,
+    };
+  });
+
+  const groupedClients = countElementsByDate(formattedNewClients);
+  const populatedGroupedClients = populateGroupedElementsDates(
     groupedClients,
     from,
     to
@@ -19,7 +32,24 @@ const getNewClientsCountByDate = async (
   return { groupBy, data: populatedGroupedClients };
 };
 
-const completeGroupedClientsCount = (groupedClients, from, to) => {
+const getClassesCountByDate = async (
+  from: Date,
+  to: Date,
+  groupBy: groupBy
+) => {
+  const newClients = await classesRepository.getClassesByDate(from, to);
+
+  const groupedClasses = countElementsByDate(newClients);
+  const populatedGroupedClients = populateGroupedElementsDates(
+    groupedClasses,
+    from,
+    to
+  );
+
+  return { groupBy, data: populatedGroupedClients };
+};
+
+const populateGroupedElementsDates = (groupedClients, from, to) => {
   const initialDate = new Date(from);
 
   for (var d = initialDate; d <= to; d.setDate(d.getDate() + 1)) {
@@ -40,9 +70,9 @@ function formatDate(date: Date) {
   return `${month}-${day}-${year}`;
 }
 
-const countUserByDate = (clients: { id: string; createdAt: Date }[]) => {
-  const dateCounts = clients.reduce((counts, item) => {
-    const formattedDate = formatDate(item.createdAt);
+const countElementsByDate = (elements: Required<DateGroupable>[]) => {
+  const dateCounts = elements.reduce((counts, e) => {
+    const formattedDate = formatDate(e.date);
     const updatedDateCount = (counts[formattedDate] || 0) + 1;
     counts[formattedDate] = updatedDateCount;
     return counts;
@@ -53,4 +83,5 @@ const countUserByDate = (clients: { id: string; createdAt: Date }[]) => {
 
 export default {
   getNewClientsCountByDate,
+  getClassesCountByDate,
 };

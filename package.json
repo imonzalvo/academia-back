@@ -22,7 +22,7 @@
     "prisma": "^5.4.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
-    },
+  },
   "dependencies": {
     "-": "^0.0.1",
     "@prisma/client": "^5.4.2",

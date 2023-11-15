@@ -27,6 +27,24 @@ const getAll = async (paginationOptions: PaginationOptions) => {
   return { data: clients, total };
 };
 
+const getClassesByDate = async (from: Date, to: Date) => {
+  const queryResult = await prisma.class.findMany({
+    where: {
+      date: { gte: from, lte: to },
+    },
+    select: {
+      id: true,
+      date: true,
+    },
+    orderBy: {
+      date: "desc",
+    },
+  })
+
+  return queryResult;
+};
+
 export default {
   getAll,
+  getClassesByDate
 };
