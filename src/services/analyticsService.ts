@@ -1,5 +1,7 @@
 import classesRepository from "../repositories/classesRepository";
 import clientsRepository from "../repositories/clientsRepository";
+import practicalExamsRepository from "../repositories/practicalExamsRepository";
+import theoryExamsRepository from "../repositories/theoryExamsRepository";
 
 type groupBy = "DATE" | "WEEK" | "MONTH";
 
@@ -7,6 +9,10 @@ interface DateGroupable {
   id: string;
   date: Date;
 }
+
+type resultDateGroupable = DateGroupable & {
+  result: string;
+};
 
 const getNewClientsCountByDate = async (
   from: Date,
@@ -26,7 +32,8 @@ const getNewClientsCountByDate = async (
   const populatedGroupedClients = populateGroupedElementsDates(
     groupedClients,
     from,
-    to
+    to,
+    0
   );
 
   return { groupBy, data: populatedGroupedClients };
@@ -43,18 +50,80 @@ const getClassesCountByDate = async (
   const populatedGroupedClients = populateGroupedElementsDates(
     groupedClasses,
     from,
-    to
+    to,
+    0
   );
 
   return { groupBy, data: populatedGroupedClients };
 };
 
-const populateGroupedElementsDates = (groupedClients, from, to) => {
+const getPracticalExamsCountByDate = async (
+  from: Date,
+  to: Date,
+  groupBy: groupBy
+) => {
+  const exams = await practicalExamsRepository.getExamsByDate(from, to);
+
+  const formattedExams = exams.map((e) => {
+    const isExamApproved = e.result.circuit && e.result.street;
+    const result = isExamApproved ? "approved" : "failed";
+    return {
+      ...e,
+      result,
+    };
+  });
+
+  const groupedExams = countElementsWithResultByDate(formattedExams);
+  const defaultValues = {
+    approved: 0,
+    failed: 0,
+  };
+  const populatedGroupedExams = populateGroupedElementsDates(
+    groupedExams,
+    from,
+    to,
+    defaultValues
+  );
+
+  return { groupBy, data: populatedGroupedExams };
+};
+
+const getTheoryExamsCountByDate = async (
+  from: Date,
+  to: Date,
+  groupBy: groupBy
+) => {
+  const exams = await theoryExamsRepository.getExamsByDate(from, to);
+
+  const formattedExams = exams.map((e) => {
+    const result = e.result ? "approved" : "failed";
+    return {
+      ...e,
+      result,
+    };
+  });
+
+  const groupedExams = countElementsWithResultByDate(formattedExams);
+  const defaultValues = {
+    approved: 0,
+    failed: 0,
+  };
+  const populatedGroupedExams = populateGroupedElementsDates(
+    groupedExams,
+    from,
+    to,
+    defaultValues
+  );
+
+  return { groupBy, data: populatedGroupedExams };
+};
+
+const populateGroupedElementsDates = (groupedClients, from, to, defaults) => {
   const initialDate = new Date(from);
 
   for (var d = initialDate; d <= to; d.setDate(d.getDate() + 1)) {
     const formattedDate = formatDate(d);
-    groupedClients[formattedDate] = groupedClients[formattedDate] || 0;
+    groupedClients[formattedDate] = groupedClients[formattedDate] || defaults;
   }
 
   return groupedClients;
@@ -70,6 +139,25 @@ function formatDate(date: Date) {
   return `${month}-${day}-${year}`;
 }
 
+const countElementsWithResultByDate = (elements: resultDateGroupable[]) => {
+  const dateCounts = elements.reduce((counts, e) => {
+    const formattedDate = formatDate(e.date);
+
+    if (!counts[formattedDate]) {
+      counts[formattedDate] = {
+        approved: 0,
+        failed: 0,
+      };
+    }
+
+    counts[formattedDate][e.result] += 1;
+
+    return counts;
+  }, {});
+
+  return dateCounts;
+};
+
 const countElementsByDate = (elements: Required<DateGroupable>[]) => {
   const dateCounts = elements.reduce((counts, e) => {
     const formattedDate = formatDate(e.date);
@@ -84,4 +172,6 @@ const countElementsByDate = (elements: Required<DateGroupable>[]) => {
 export default {
   getNewClientsCountByDate,
   getClassesCountByDate,
+  getPracticalExamsCountByDate,
+  getTheoryExamsCountByDate,
 };

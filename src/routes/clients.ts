@@ -95,7 +95,7 @@ router.get(`/clients`, async (req: Request, res: Response) => {
     skipNumber,
     limitNumber,
     search as string,
-    status
+    status as string
   );
 
   res.json(clients);

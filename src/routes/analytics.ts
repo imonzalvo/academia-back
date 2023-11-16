@@ -47,4 +47,54 @@ router.get(`/analytics/classes`, async (req: Request, res: Response) => {
   }
 });
 
+router.get(
+  `/analytics/practical_exams`,
+  async (req: Request, res: Response) => {
+    const { from, to } = req.query;
+    try {
+      const dateTo = new Date(to as string);
+      const dateFrom = new Date(from as string);
+
+      const result = await analyticsService.getPracticalExamsCountByDate(
+        dateFrom,
+        dateTo,
+        "DATE"
+      );
+
+      const formattedResultData = Object.entries(result.data).map((entry) => {
+        return { date: entry[0], count: entry[1] };
+      });
+
+      res.json({ data: formattedResultData, groupBy: result.groupBy });
+    } catch (error) {
+      res.json({ error: `Error getting practical exams count ${error}` });
+    }
+  }
+);
+
+router.get(
+  `/analytics/theory_exams`,
+  async (req: Request, res: Response) => {
+    const { from, to } = req.query;
+    try {
+      const dateTo = new Date(to as string);
+      const dateFrom = new Date(from as string);
+
+      const result = await analyticsService.getTheoryExamsCountByDate(
+        dateFrom,
+        dateTo,
+        "DATE"
+      );
+
+      const formattedResultData = Object.entries(result.data).map((entry) => {
+        return { date: entry[0], count: entry[1] };
+      });
+
+      res.json({ data: formattedResultData, groupBy: result.groupBy });
+    } catch (error) {
+      res.json({ error: `Error getting theory exams count ${error}` });
+    }
+  }
+);
+
 export default router;

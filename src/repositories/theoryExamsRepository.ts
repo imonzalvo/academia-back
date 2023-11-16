@@ -73,8 +73,33 @@ const findNextExams = async (paginationOptions: PaginationOptions) => {
   return { data: theoryExams, total };
 };
 
+const getExamsByDate = async (from: Date, to: Date) => {
+  const maxDate = to < new Date() ? to : new Date();
+
+  const queryResult = await prisma.theoryExam.findMany({
+    where: {
+      date: { gte: from, lte: maxDate },
+      status: {
+        in: ["DONE", "PENDING"]
+      },
+    },
+    select: {
+      id: true,
+      date: true,
+      status: true,
+      result: true,
+    },
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  return queryResult;
+};
+
 export default {
   findNextExams,
   findClientNext,
   create,
+  getExamsByDate,
 };
