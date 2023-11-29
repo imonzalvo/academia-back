@@ -1,6 +1,10 @@
 // import { Prisma, PrismaClient } from "@prisma/client";
 import express, { Express } from "express";
 import router from "./routes";
+import passport from "passport";
+import auth from "./routes/auth";
+import jwtPassport from "./lib/passport";
+import { UserAcademy } from "@prisma/client";
 
 const app: Express = express();
 app.use(function (req, res, next) {
@@ -27,7 +31,33 @@ app.use(function (req, res, next) {
   next();
 });
 
+jwtPassport(passport);
+app.use(passport.initialize());
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/", auth);
+
+const authMiddleware = (req, res, next) => {
+  passport.authenticate(
+    "jwt",
+    { session: false },
+    (err, user: UserAcademy, info) => {
+      console.log("err", err, user, info);
+      if (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      req.user = user;
+      next();
+    }
+  )(req, res, next);
+};
+
+app.use(authMiddleware);
 app.use(router);
 
 app.use((err, req, res, next) => {

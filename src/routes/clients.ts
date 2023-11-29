@@ -107,7 +107,13 @@ router.get(`/clients/:id`, async (req: Request, res: Response) => {
 
   const client = await clientsService.get(id);
 
+  if (!client) {
+    res.status(404).json({ error: "Client not found" });
+    return;
+  }
+
   res.json(client);
+  return;
 });
 
 router.post("/clients/:id/payments", async (req, res) => {

@@ -39,6 +39,8 @@ const create = async (newClient: ICreateClient) => {
 };
 
 const get = async (id: string) => {
+  if (!id) return null;
+
   const client = await prisma.client.findFirst({
     where: { id },
     include: {

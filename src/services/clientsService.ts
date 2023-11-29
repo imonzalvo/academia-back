@@ -17,6 +17,8 @@ const create = async (client: ICreateClient) => {
 const get = async (id: string) => {
   const client = await clientsRepository.get(id);
 
+  if (!client) return null;
+
   const pendingPracticalExam = client.practicalExams.filter((exam) => {
     return new Date(exam.date) > new Date() && exam.status == "PENDING";
   })[0];

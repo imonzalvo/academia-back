@@ -5,7 +5,7 @@ import payments from "./payments";
 import practicalExams from "./practicalExams";
 import theoryExams from "./theoryExams";
 import classes from "./classes";
-import auth from "./auth";
+import academies from "./academies";
 import analytics from "./analytics";
 
 const router = Router();
@@ -15,7 +15,7 @@ router.use("/", payments);
 router.use("/", practicalExams);
 router.use("/", theoryExams);
 router.use("/", classes);
-router.use("/", auth);
 router.use("/", analytics);
+router.use("/", academies);
 
 export default router;

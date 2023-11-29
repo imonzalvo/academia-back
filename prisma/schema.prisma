@@ -10,6 +10,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Academy {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  phone     String?
+  email     String?
+  address   String?
+  handle    String
+  createdAt DateTime?     @default(now()) @map(name: "created_at")
+  updatedAt DateTime?     @updatedAt @map(name: "updated_at")
+  users     UserAcademy[]
+  clients   Client[]
+}
+
+model UserAcademy {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  username  String
+  email     String?
+  salt      String
+  hash      String
+  role      Role
+  academy   Academy?  @relation(fields: [academyId], references: [id])
+  academyId String?   @db.ObjectId
+  createdAt DateTime? @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+}
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  SECRETARY
+  SUPER_ADMIN
+}
+
 model Payment {
   id        String       @id @default(auto()) @map("_id") @db.ObjectId
   amount    Int
@@ -97,6 +131,8 @@ model Client {
   notes          String?
   createdAt      DateTime        @default(now()) @map(name: "created_at")
   updatedAt      DateTime        @updatedAt @map(name: "updated_at")
+  academy_id     String?         @db.ObjectId
+  academy        Academy?        @relation(fields: [academy_id], references: [id])
   payments       Payment[]
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]
