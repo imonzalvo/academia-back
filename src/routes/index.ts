@@ -7,6 +7,7 @@ import theoryExams from "./theoryExams";
 import classes from "./classes";
 import academies from "./academies";
 import analytics from "./analytics";
+import users from "./users";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/", theoryExams);
 router.use("/", classes);
 router.use("/", analytics);
 router.use("/", academies);
+router.use("/", users);
 
 export default router;

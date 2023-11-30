@@ -15,11 +15,16 @@ type resultDateGroupable = DateGroupable & {
 };
 
 const getNewClientsCountByDate = async (
+  academyId: string,
   from: Date,
   to: Date,
   groupBy: groupBy
 ) => {
-  const newClients = await clientsRepository.getNewClientsByDate(from, to);
+  const newClients = await clientsRepository.getNewClientsByDate(
+    academyId,
+    from,
+    to
+  );
 
   const formattedNewClients = newClients.map((client) => {
     return {
@@ -40,11 +45,16 @@ const getNewClientsCountByDate = async (
 };
 
 const getClassesCountByDate = async (
+  academyId: string,
   from: Date,
   to: Date,
   groupBy: groupBy
 ) => {
-  const newClients = await classesRepository.getClassesByDate(from, to);
+  const newClients = await classesRepository.getClassesByDate(
+    academyId,
+    from,
+    to
+  );
 
   const groupedClasses = countElementsByDate(newClients);
   const populatedGroupedClients = populateGroupedElementsDates(
@@ -58,11 +68,16 @@ const getClassesCountByDate = async (
 };
 
 const getPracticalExamsCountByDate = async (
+  academyId: string,
   from: Date,
   to: Date,
   groupBy: groupBy
 ) => {
-  const exams = await practicalExamsRepository.getExamsByDate(from, to);
+  const exams = await practicalExamsRepository.getExamsByDate(
+    academyId,
+    from,
+    to
+  );
 
   const formattedExams = exams.map((e) => {
     const isExamApproved = e.result.circuit && e.result.street;
@@ -89,11 +104,12 @@ const getPracticalExamsCountByDate = async (
 };
 
 const getTheoryExamsCountByDate = async (
+  academyId: string,
   from: Date,
   to: Date,
   groupBy: groupBy
 ) => {
-  const exams = await theoryExamsRepository.getExamsByDate(from, to);
+  const exams = await theoryExamsRepository.getExamsByDate(academyId, from, to);
 
   const formattedExams = exams.map((e) => {
     const result = e.result ? "approved" : "failed";
@@ -117,6 +133,8 @@ const getTheoryExamsCountByDate = async (
 
   return { groupBy, data: populatedGroupedExams };
 };
+
+// Utils functions
 
 const populateGroupedElementsDates = (groupedClients, from, to, defaults) => {
   const initialDate = new Date(from);

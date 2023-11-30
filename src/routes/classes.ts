@@ -1,16 +1,22 @@
 import { Router, Request, Response } from "express";
 import prisma from "../lib/db";
+import clientsService from "../services/clientsService";
+import classesService from "../services/classesService";
 
 const router = Router();
 
-router.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
-  const { id: clientId } = req.params;
+router.post(
+  `/clients/:id/classes`,
+  async (req: Request, res: Response, next) => {
+    const { id: clientId } = req.params;
 
-  try {
-    const { date, time, comment, notified, instructor, status, paid } =
-      req.body;
-    const result = await prisma.class.create({
-      data: {
+    const user = req.user;
+
+    try {
+      const { date, time, comment, notified, instructor, status, paid } =
+        req.body;
+
+      const classData = {
         date,
         time,
         comment,
@@ -18,49 +24,49 @@ router.post(`/clients/:id/classes`, async (req: Request, res: Response) => {
         instructor,
         status,
         paid,
-        client: { connect: { id: clientId } },
-      },
-    });
-    res.json(result);
-  } catch (e) {
-    res.sendStatus(500);
-  }
-});
+        clientId,
+      };
 
-router.put(`/classes/:id`, async (req: Request, res: Response) => {
+      const result = await classesService.create(classData, user);
+      res.json(result);
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.put(`/classes/:id`, async (req: Request, res: Response, next) => {
   try {
     const { id } = req.params;
     const { date, time, comment, notified, instructor, status, paid } =
       req.body;
 
-    const result = await prisma.class.update({
-      where: { id },
-      data: {
-        date,
-        time,
-        comment,
-        notified,
-        instructor,
-        status,
-        paid,
-      },
-    });
+    const classData = {
+      id,
+      date,
+      time,
+      comment,
+      notified,
+      instructor,
+      status,
+      paid,
+    };
+
+    const result = await classesService.update(classData, req.user);
     res.json(result);
   } catch (e) {
-    res.sendStatus(500);
+    next(e);
   }
 });
 
-router.delete(`/classes/:id`, async (req: Request, res: Response) => {
+router.delete(`/classes/:id`, async (req: Request, res: Response, next) => {
   try {
     const { id } = req.params;
 
-    const result = await prisma.class.delete({
-      where: { id },
-    });
+    const result = await classesService.delete(id, req.user);
     res.json(result);
   } catch (e) {
-    res.sendStatus(500);
+    next(e);
   }
 });
 

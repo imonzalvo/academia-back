@@ -7,9 +7,7 @@ const ExtractJwt = PassportJwt.ExtractJwt;
 
 declare global {
   namespace Express {
-    interface User {
-      id: string
-    }
+    interface User extends UserAcademy {}
   }
 }
 

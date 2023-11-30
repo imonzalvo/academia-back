@@ -20,6 +20,8 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       status,
     } = req.body;
 
+    const user = req.user;
+
     const newClient: ICreateClient = {
       name,
       lastName,
@@ -30,6 +32,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      academyId: user?.academyId,
     };
 
     const result = await clientsService.create(newClient);
@@ -54,6 +57,8 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       status,
     } = req.body;
 
+    const user = req.user;
+
     const updatedClient: Partial<ICreateClient> = {
       id,
       name,
@@ -65,9 +70,10 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      academyId: user?.academyId,
     };
 
-    const result = await clientsService.update(updatedClient);
+    const result = await clientsService.update(updatedClient, user);
     res.json(result);
   } catch (e) {
     res.sendStatus(500);
@@ -88,10 +94,13 @@ router.get(`/clients`, async (req: Request, res: Response) => {
     return;
   }
 
+  const academyId = req.user?.academyId;
+
   const skipNumber = parseInt(skip as string);
   const limitNumber = parseInt(limit as string);
 
   const clients = await clientsService.getClients(
+    academyId,
     skipNumber,
     limitNumber,
     search as string,
@@ -102,18 +111,16 @@ router.get(`/clients`, async (req: Request, res: Response) => {
   return;
 });
 
-router.get(`/clients/:id`, async (req: Request, res: Response) => {
+router.get(`/clients/:id`, async (req: Request, res: Response, next) => {
   const { id } = req.params;
 
-  const client = await clientsService.get(id);
-
-  if (!client) {
-    res.status(404).json({ error: "Client not found" });
-    return;
+  try {
+    const client = await clientsService.get(id, req.user);
+    res.json(client);
+  } catch (error) {
+    console.log(error);
+    return next(error);
   }
-
-  res.json(client);
-  return;
 });
 
 router.post("/clients/:id/payments", async (req, res) => {

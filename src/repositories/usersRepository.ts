@@ -1,4 +1,3 @@
-import { UserAcademy } from "@prisma/client";
 import prisma from "../lib/db";
 
 const create = async (user) => {

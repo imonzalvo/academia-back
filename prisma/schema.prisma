@@ -131,8 +131,8 @@ model Client {
   notes          String?
   createdAt      DateTime        @default(now()) @map(name: "created_at")
   updatedAt      DateTime        @updatedAt @map(name: "updated_at")
-  academy_id     String?         @db.ObjectId
-  academy        Academy?        @relation(fields: [academy_id], references: [id])
+  academyId      String?         @db.ObjectId
+  academy        Academy?        @relation(fields: [academyId], references: [id])
   payments       Payment[]
   practicalExams PracticalExam[]
   theoryExams    TheoryExam[]

@@ -12,6 +12,7 @@ export interface ICreateClient {
   address: string;
   notes: string;
   secondaryPhone: string;
+  academyId?: string;
   status: "DONE" | "ACTIVE" | "INACTIVE";
 }
 
@@ -32,13 +33,14 @@ const create = async (newClient: ICreateClient) => {
       notes: newClient.notes,
       secondaryPhone: newClient.secondaryPhone,
       status: newClient.status,
+      academy: { connect: { id: newClient.academyId } },
     },
   });
 
   return result;
 };
 
-const get = async (id: string) => {
+const get = async (id: string): Promise<Client> => {
   if (!id) return null;
 
   const client = await prisma.client.findFirst({
@@ -118,11 +120,16 @@ const getAll = async (paginationOptions: PaginationOptions) => {
 };
 
 const search = async (
+  academyId: string,
   paginationOptions: PaginationOptions,
   search: string | undefined,
   status: ClientStatus | undefined
 ) => {
   const searchConditionsConjunction = [];
+
+  searchConditionsConjunction.push({
+    academyId: academyId,
+  });
 
   if (!!search) {
     const nameSearchClause = {
@@ -172,9 +179,10 @@ const search = async (
   return { data: clients, total };
 };
 
-const getNewClientsByDate = async (from: Date, to: Date) => {
+const getNewClientsByDate = async (academyId: string, from: Date, to: Date) => {
   const queryResult = await prisma.client.findMany({
     where: {
+      academyId,
       createdAt: { gte: from, lte: to },
     },
     select: {

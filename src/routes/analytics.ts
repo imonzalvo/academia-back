@@ -9,7 +9,10 @@ router.get(`/analytics/new_clients`, async (req: Request, res: Response) => {
     const dateTo = new Date(to as string);
     const dateFrom = new Date(from as string);
 
+    const academyId = req.user?.academyId;
+
     const result = await analyticsService.getNewClientsCountByDate(
+      academyId,
       dateFrom,
       dateTo,
       "DATE"
@@ -31,7 +34,10 @@ router.get(`/analytics/classes`, async (req: Request, res: Response) => {
     const dateTo = new Date(to as string);
     const dateFrom = new Date(from as string);
 
+    const academyId = req.user?.academyId;
+
     const result = await analyticsService.getClassesCountByDate(
+      academyId,
       dateFrom,
       dateTo,
       "DATE"
@@ -55,7 +61,10 @@ router.get(
       const dateTo = new Date(to as string);
       const dateFrom = new Date(from as string);
 
+      const academyId = req.user?.academyId;
+
       const result = await analyticsService.getPracticalExamsCountByDate(
+        academyId,
         dateFrom,
         dateTo,
         "DATE"
@@ -72,29 +81,29 @@ router.get(
   }
 );
 
-router.get(
-  `/analytics/theory_exams`,
-  async (req: Request, res: Response) => {
-    const { from, to } = req.query;
-    try {
-      const dateTo = new Date(to as string);
-      const dateFrom = new Date(from as string);
+router.get(`/analytics/theory_exams`, async (req: Request, res: Response) => {
+  const { from, to } = req.query;
+  try {
+    const dateTo = new Date(to as string);
+    const dateFrom = new Date(from as string);
 
-      const result = await analyticsService.getTheoryExamsCountByDate(
-        dateFrom,
-        dateTo,
-        "DATE"
-      );
+    const academyId = req.user?.academyId;
 
-      const formattedResultData = Object.entries(result.data).map((entry) => {
-        return { date: entry[0], count: entry[1] };
-      });
+    const result = await analyticsService.getTheoryExamsCountByDate(
+      academyId,
+      dateFrom,
+      dateTo,
+      "DATE"
+    );
 
-      res.json({ data: formattedResultData, groupBy: result.groupBy });
-    } catch (error) {
-      res.json({ error: `Error getting theory exams count ${error}` });
-    }
+    const formattedResultData = Object.entries(result.data).map((entry) => {
+      return { date: entry[0], count: entry[1] };
+    });
+
+    res.json({ data: formattedResultData, groupBy: result.groupBy });
+  } catch (error) {
+    res.json({ error: `Error getting theory exams count ${error}` });
   }
-);
+});
 
 export default router;

@@ -85,14 +85,17 @@ const create = async (newPracticalExam: ICreatePracticalExam) => {
   return createdPayment;
 };
 
-const getExamsByDate = async (from: Date, to: Date) => {
+const getExamsByDate = async (academyId: string, from: Date, to: Date) => {
   const maxDate = to < new Date() ? to : new Date();
 
   const queryResult = await prisma.practicalExam.findMany({
     where: {
+      client: {
+        academyId,
+      },
       date: { gte: from, lte: maxDate },
       status: {
-        in: ["DONE", "PENDING"]
+        in: ["DONE", "PENDING"],
       },
     },
     select: {
