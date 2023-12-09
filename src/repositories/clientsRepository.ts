@@ -5,6 +5,7 @@ import {
   Class,
   TheoryExam,
   PracticalExam,
+  knownUsBy,
 } from "@prisma/client";
 import prisma from "../lib/db";
 import { PaginationOptions } from "./types";
@@ -21,6 +22,7 @@ export interface ICreateClient {
   secondaryPhone: string;
   academyId?: string;
   status: "DONE" | "ACTIVE" | "INACTIVE";
+  knownUsBy: knownUsBy;
 }
 
 interface ClientSearch {
@@ -40,6 +42,7 @@ const create = async (newClient: ICreateClient) => {
       notes: newClient.notes,
       secondaryPhone: newClient.secondaryPhone,
       status: newClient.status,
+      knownUsBy: newClient.knownUsBy,
       academy: { connect: { id: newClient.academyId } },
     },
   });
@@ -96,6 +99,7 @@ const update = async (updatedClient: Partial<ICreateClient>) => {
       address: updatedClient.address,
       notes: updatedClient.notes,
       secondaryPhone: updatedClient.secondaryPhone,
+      knownUsBy: updatedClient.knownUsBy,
       status: updatedClient.status,
     },
   });
@@ -207,6 +211,39 @@ const getNewClientsByDate = async (academyId: string, from: Date, to: Date) => {
   return queryResult;
 };
 
+const getKnownByStats = async (
+  academyId: string,
+  dateRange?: { from: Date; to: Date }
+) => {
+  const whereClause = {
+    knownUsBy: {
+      not: null,
+    },
+    academyId,
+  };
+
+  if (!!dateRange) {
+    whereClause["createdAt"] = {
+      gte: dateRange.from,
+      lte: dateRange.to,
+    };
+  }
+
+  const queryResult = await prisma.client.groupBy({
+    by: ["knownUsBy"],
+    where: whereClause,
+    _count: true,
+  });
+
+  const formattedResult = queryResult.map((result) => {
+    return {
+      category: result.knownUsBy,
+      count: result._count,
+    };
+  });
+
+  return formattedResult;
+};
 export default {
   create,
   get,
@@ -215,4 +252,5 @@ export default {
   getAll,
   search,
   getNewClientsByDate,
+  getKnownByStats,
 };

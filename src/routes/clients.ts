@@ -18,6 +18,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      knownUsBy,
     } = req.body;
 
     const user = req.user;
@@ -32,6 +33,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      knownUsBy,
       academyId: user?.academyId,
     };
 
@@ -55,6 +57,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      knownUsBy,
     } = req.body;
 
     const user = req.user;
@@ -70,6 +73,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       notes,
       secondaryPhone,
       status,
+      knownUsBy,
       academyId: user?.academyId,
     };
 

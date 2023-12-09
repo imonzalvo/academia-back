@@ -102,6 +102,7 @@ enum Status {
   CANCELED
   PENDING
   DONE
+  ABSENT
 }
 
 model Class {
@@ -138,8 +139,19 @@ model Client {
   theoryExams    TheoryExam[]
   classes        Class[]
   status         ClientStatus?   @default(ACTIVE)
+  knownUsBy      knownUsBy?
 
   @@map(name: "clients")
+}
+
+enum knownUsBy {
+  GOOGLE
+  FRIEND
+  SOCIAL_NETWORK
+  EMAIL
+  STREET
+  OTHER
+  NA
 }
 
 enum ClientStatus {

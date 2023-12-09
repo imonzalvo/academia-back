@@ -8,7 +8,6 @@ import { UserAcademy } from "@prisma/client";
 
 const app: Express = express();
 app.use(function (req, res, next) {
-  console.log("req headersssss", req.method, req.headers);
   next();
 });
 app.use(function (req, res, next) {
@@ -49,7 +48,6 @@ const authMiddleware = (req, res, next) => {
       "jwt",
       { session: false },
       (err, user: UserAcademy, info) => {
-        console.log("err", err, user, info, req.headers);
         if (err) {
           return res.status(401).json({ message: "Unauthorized" });
         }

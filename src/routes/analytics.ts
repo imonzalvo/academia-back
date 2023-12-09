@@ -106,4 +106,26 @@ router.get(`/analytics/theory_exams`, async (req: Request, res: Response) => {
   }
 });
 
+// This endpoint will return statistic about the way clients know about the academy
+router.get(`/analytics/known_by`, async (req: Request, res: Response) => {
+  const { from, to } = req.query;
+  try {
+    let dateRange = undefined;
+    if (!!from && !!to) {
+      dateRange = {
+        from: new Date(from as string),
+        to: new Date(to as string),
+      };
+    }
+
+    const academyId = req.user?.academyId;
+
+    const result = await analyticsService.getKnownByStats(academyId, dateRange);
+
+    res.json(result);
+  } catch (error) {
+    res.json({ error: `Error getting theory exams count ${error}` });
+  }
+});
+
 export default router;

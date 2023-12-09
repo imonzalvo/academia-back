@@ -134,7 +134,15 @@ const getTheoryExamsCountByDate = async (
   return { groupBy, data: populatedGroupedExams };
 };
 
-// Utils functions
+// This function will return stats about the way clients known us
+const getKnownByStats = async (academyId: string, dateRange?: { from: Date; to: Date }) => {
+  const queryResult = await clientsRepository.getKnownByStats(academyId, dateRange);
+  return queryResult;
+};
+
+// ********************
+// *  Utils functions *
+// ********************
 
 const populateGroupedElementsDates = (groupedClients, from, to, defaults) => {
   const initialDate = new Date(from);
@@ -192,4 +200,5 @@ export default {
   getClassesCountByDate,
   getPracticalExamsCountByDate,
   getTheoryExamsCountByDate,
+  getKnownByStats,
 };
