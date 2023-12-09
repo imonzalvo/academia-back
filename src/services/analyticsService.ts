@@ -135,9 +135,59 @@ const getTheoryExamsCountByDate = async (
 };
 
 // This function will return stats about the way clients known us
-const getKnownByStats = async (academyId: string, dateRange?: { from: Date; to: Date }) => {
-  const queryResult = await clientsRepository.getKnownByStats(academyId, dateRange);
+const getKnownByStats = async (
+  academyId: string,
+  dateRange?: { from: Date; to: Date }
+) => {
+  const queryResult = await clientsRepository.getKnownByStats(
+    academyId,
+    dateRange
+  );
   return queryResult;
+};
+
+const getClientsGeneralStats = async (academyId: string) => {
+  const [activeClientsCount, doneClientsGeneralInfo] = await Promise.all([
+    clientsRepository.getCountActiveClients(academyId),
+    clientsRepository.getGeneralInfoDoneStudents(academyId),
+  ]);
+
+  const averagesInfo = calculateAveragesForDoneClients(doneClientsGeneralInfo);
+
+  return {
+    activeClientsCount,
+    doneClientsInfo: {
+      classesAvg: averagesInfo.classesAverage,
+      practicalExamsAvg: averagesInfo.practicalExamsAverage,
+      theoryExamsAvg: averagesInfo.theoryExamsAverage,
+    },
+  };
+};
+
+const calculateAveragesForDoneClients = (clientsInfo) => {
+  const totalClients = clientsInfo.length;
+
+  const totalClasses = clientsInfo.reduce((acc, b) => {
+    return acc + b._count.classes;
+  }, 0);
+
+  const totalPracticalExams = clientsInfo.reduce(
+    (acc, b) => acc + b._count.practicalExams,
+    0
+  );
+
+  const totalTheoryExams = clientsInfo.reduce(
+    (acc, b) => acc + b._count.theoryExams,
+    0
+  );
+
+  const avgs = {
+    classesAverage: totalClasses / totalClients,
+    practicalExamsAverage: totalPracticalExams / totalClients,
+    theoryExamsAverage: totalTheoryExams / totalClients,
+  };
+
+  return avgs;
 };
 
 // ********************
@@ -201,4 +251,5 @@ export default {
   getPracticalExamsCountByDate,
   getTheoryExamsCountByDate,
   getKnownByStats,
+  getClientsGeneralStats,
 };

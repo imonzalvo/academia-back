@@ -244,6 +244,38 @@ const getKnownByStats = async (
 
   return formattedResult;
 };
+
+const getCountActiveClients = async (academyId: string) => {
+  const queryResult = await prisma.client.count({
+    where: {
+      academyId,
+      status: "ACTIVE",
+    },
+  });
+
+  return queryResult;
+};
+
+const getGeneralInfoDoneStudents = async (academyId: string) => {
+  const queryResult = await prisma.client.findMany({
+    where: {
+      academyId,
+      status: "DONE",
+    },
+    select: {
+      _count: {
+        select: {
+          classes: true,
+          theoryExams: true,
+          practicalExams: true,
+        },
+      },
+    },
+  });
+
+  return queryResult;
+};
+
 export default {
   create,
   get,
@@ -253,4 +285,6 @@ export default {
   search,
   getNewClientsByDate,
   getKnownByStats,
+  getCountActiveClients,
+  getGeneralInfoDoneStudents,
 };

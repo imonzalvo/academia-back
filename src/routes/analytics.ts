@@ -128,4 +128,20 @@ router.get(`/analytics/known_by`, async (req: Request, res: Response) => {
   }
 });
 
+// This endpoint will return general statistics about clients
+router.get(
+  `/analytics/clients_general`,
+  async (req: Request, res: Response) => {
+    try {
+      const academyId = req.user?.academyId;
+
+      const result = await analyticsService.getClientsGeneralStats(academyId);
+
+      res.json(result);
+    } catch (error) {
+      res.json({ error: `Error getting theory exams count ${error}` });
+    }
+  }
+);
+
 export default router;
