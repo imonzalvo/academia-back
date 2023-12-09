@@ -22,6 +22,7 @@ const create = async (client: ICreateClient) => {
 };
 
 const get = async (id: string, currentUser) => {
+  const client = await clientsRepository.get(id);
   await validateClientForUser(id, currentUser);
 
   const pendingPracticalExam = client.practicalExams.filter((exam) => {

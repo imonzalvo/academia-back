@@ -16,6 +16,7 @@ router.post(`/sign_in`, async (req, res) => {
 // Validate an existing user and issue a JWT
 router.post("/login", async (req, res, next) => {
   const { username, password } = req.body;
+
   try {
     const user = await usersRepository.findByUsername(username);
     if (!user) {
@@ -25,7 +26,7 @@ router.post("/login", async (req, res, next) => {
     }
 
     const isValid = utils.validPassword(
-      req.body.password,
+      password,
       user.hash,
       user.salt
     );

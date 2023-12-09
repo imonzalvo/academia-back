@@ -118,7 +118,6 @@ router.get(`/clients/:id`, async (req: Request, res: Response, next) => {
     const client = await clientsService.get(id, req.user);
     res.json(client);
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 });

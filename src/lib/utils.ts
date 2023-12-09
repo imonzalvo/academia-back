@@ -49,11 +49,11 @@ function genPassword(password) {
 function issueJWT(user) {
   const _id = user.id;
 
-  const expiresIn = "1d";
+  const expiresIn = "40d";
 
   const payload = {
     sub: _id,
-    iat: Date.now(),
+    iat: Math.floor(Date.now() / 1000),
   };
 
   const signedToken = jsonwebtoken.sign(payload, process.env.JWT_SECRET, {

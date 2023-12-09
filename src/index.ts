@@ -8,6 +8,10 @@ import { UserAcademy } from "@prisma/client";
 
 const app: Express = express();
 app.use(function (req, res, next) {
+  console.log("req headersssss", req.method, req.headers);
+  next();
+});
+app.use(function (req, res, next) {
   // Website you wish to allow to connect
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -20,7 +24,7 @@ app.use(function (req, res, next) {
   // Request headers you wish to allow
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
+    "X-Requested-With,content-type,authorization"
   );
 
   // Set to true if you need the website to include cookies in the requests sent
@@ -40,21 +44,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", auth);
 
 const authMiddleware = (req, res, next) => {
-  passport.authenticate(
-    "jwt",
-    { session: false },
-    (err, user: UserAcademy, info) => {
-      console.log("err", err, user, info);
-      if (err) {
-        return res.status(401).json({ message: "Unauthorized" });
+  if (req.method !== "OPTIONS") {
+    passport.authenticate(
+      "jwt",
+      { session: false },
+      (err, user: UserAcademy, info) => {
+        console.log("err", err, user, info, req.headers);
+        if (err) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+        if (!user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+        req.user = user;
+        next();
       }
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      req.user = user;
-      next();
-    }
-  )(req, res, next);
+    )(req, res, next);
+  } else {
+    next();
+  }
 };
 
 app.use(authMiddleware);
