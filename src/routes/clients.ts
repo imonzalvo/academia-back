@@ -82,7 +82,9 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
 
 router.delete(`/clients/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await clientsService.delete(id);
+  const user = req.user;
+
+  const result = await clientsService.delete(id, user);
   res.json(result);
 });
 

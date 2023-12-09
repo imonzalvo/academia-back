@@ -1,5 +1,5 @@
-const crypto2 = require("crypto");
-const jsonwebtoken = require("jsonwebtoken");
+import crypto2 from "crypto";
+import jsonwebtoken from "jsonwebtoken";
 
 /**
  * -------------- HELPER FUNCTIONS ----------------

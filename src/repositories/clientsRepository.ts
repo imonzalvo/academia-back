@@ -1,4 +1,11 @@
-import { Client, Prisma, ClientStatus } from "@prisma/client";
+import {
+  Client,
+  Prisma,
+  ClientStatus,
+  Class,
+  TheoryExam,
+  PracticalExam,
+} from "@prisma/client";
 import prisma from "../lib/db";
 import { PaginationOptions } from "./types";
 
@@ -40,7 +47,13 @@ const create = async (newClient: ICreateClient) => {
   return result;
 };
 
-const get = async (id: string): Promise<Client> => {
+type PopulatedClient = Client & {
+  classes: Class[];
+  theoryExams: TheoryExam[];
+  practicalExams: PracticalExam[];
+};
+
+const get = async (id: string): Promise<PopulatedClient> => {
   if (!id) return null;
 
   const client = await prisma.client.findFirst({
