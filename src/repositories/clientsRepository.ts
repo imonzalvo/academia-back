@@ -165,6 +165,12 @@ const search = async (
             mode: "insensitive" as Prisma.QueryMode,
           },
         },
+        {
+          fullName: {
+            contains: search,
+            mode: "insensitive" as Prisma.QueryMode,
+          },
+        },
       ],
     };
     searchConditionsConjunction.push(nameSearchClause);
