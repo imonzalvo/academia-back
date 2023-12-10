@@ -31,6 +31,7 @@ interface ClientSearch {
 }
 
 const create = async (newClient: ICreateClient) => {
+  const fullName = `${newClient.name} ${newClient.lastName}`;
   const result = await prisma.client.create({
     data: {
       name: newClient.name,
@@ -44,6 +45,7 @@ const create = async (newClient: ICreateClient) => {
       status: newClient.status,
       knownUsBy: newClient.knownUsBy,
       academy: { connect: { id: newClient.academyId } },
+      fullName,
     },
   });
 
@@ -88,6 +90,8 @@ const get = async (id: string): Promise<PopulatedClient> => {
 };
 
 const update = async (updatedClient: Partial<ICreateClient>) => {
+  const fullName = `${updatedClient.name} ${updatedClient.lastName}`;
+
   const result = await prisma.client.update({
     where: { id: updatedClient.id },
     data: {
@@ -101,6 +105,7 @@ const update = async (updatedClient: Partial<ICreateClient>) => {
       secondaryPhone: updatedClient.secondaryPhone,
       knownUsBy: updatedClient.knownUsBy,
       status: updatedClient.status,
+      fullName,
     },
   });
 

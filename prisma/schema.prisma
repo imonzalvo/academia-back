@@ -124,6 +124,7 @@ model Client {
   id             String          @id @default(auto()) @map("_id") @db.ObjectId
   name           String
   lastName       String?
+  fullName       String?
   email          String?
   address        String
   ci             String
