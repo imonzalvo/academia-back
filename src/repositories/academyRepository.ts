@@ -17,6 +17,11 @@ export interface IUpdateAcademy {
   address?: string;
 }
 
+export interface ICreateInstructor {
+  name: string;
+  username: string;
+}
+
 const create = async (academy: ICreateAcademy) => {
   const result = await prisma.academy.create({
     data: {
@@ -44,7 +49,36 @@ const update = async (academy: IUpdateAcademy) => {
   return result;
 };
 
+const createInstructor = async (
+  academyId: string,
+  instructorData: ICreateInstructor
+) => {
+  const newInstructor = await prisma.userAcademy.create({
+    data: {
+      name: instructorData.name,
+      username: instructorData.username,
+      academy: { connect: { id: academyId } },
+      role: "INSTRUCTOR",
+    },
+  });
+
+  return newInstructor;
+};
+
+const getInstructors = async (academyId: string) => {
+  const newInstructor = await prisma.userAcademy.findMany({
+    where: {
+      academyId,
+      role: "INSTRUCTOR",
+    },
+  });
+
+  return newInstructor;
+};
+
 export default {
   create,
   update,
+  createInstructor,
+  getInstructors
 };

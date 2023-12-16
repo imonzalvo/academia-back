@@ -1,6 +1,4 @@
 import { Router, Request, Response } from "express";
-import prisma from "../lib/db";
-import clientsService from "../services/clientsService";
 import classesService from "../services/classesService";
 
 const router = Router();
@@ -13,8 +11,16 @@ router.post(
     const user = req.user;
 
     try {
-      const { date, time, comment, notified, instructor, status, paid } =
-        req.body;
+      const {
+        date,
+        time,
+        comment,
+        notified,
+        instructor,
+        status,
+        paid,
+        instructorId,
+      } = req.body;
 
       const classData = {
         date,
@@ -25,6 +31,7 @@ router.post(
         status,
         paid,
         clientId,
+        instructorId,
       };
 
       const result = await classesService.create(classData, user);
@@ -38,8 +45,16 @@ router.post(
 router.put(`/classes/:id`, async (req: Request, res: Response, next) => {
   try {
     const { id } = req.params;
-    const { date, time, comment, notified, instructor, status, paid } =
-      req.body;
+    const {
+      date,
+      time,
+      comment,
+      notified,
+      instructor,
+      status,
+      paid,
+      instructorId,
+    } = req.body;
 
     const classData = {
       id,
@@ -50,6 +65,7 @@ router.put(`/classes/:id`, async (req: Request, res: Response, next) => {
       instructor,
       status,
       paid,
+      instructorId,
     };
 
     const result = await classesService.update(classData, req.user);

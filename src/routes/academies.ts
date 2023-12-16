@@ -57,4 +57,36 @@ router.put(`/academies/:id`, async (req: Request, res: Response) => {
   }
 });
 
+router.post(`/academies/instructors`, async (req: Request, res: Response) => {
+  try {
+    const { name, username } = req.body;
+
+    const user = req.user as UserAcademy;
+
+    const instructorData = {
+      name,
+      username,
+    };
+
+    const result = await academiesServices.createInstructor(
+      user.academyId,
+      instructorData
+    );
+    res.json(result);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+router.get(`/academies/instructors`, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as UserAcademy;
+
+    const result = await academiesServices.getInstructors(user.academyId);
+    res.json(result);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
 export default router;

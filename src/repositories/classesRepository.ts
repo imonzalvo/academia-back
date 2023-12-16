@@ -11,6 +11,7 @@ export interface ICreateClass {
   instructor?: string;
   status?: Status;
   paid?: boolean;
+  instructorId?: string;
 }
 
 export interface IUpdateClass {
@@ -22,6 +23,7 @@ export interface IUpdateClass {
   instructor?: string;
   status?: Status;
   paid?: boolean;
+  instructorId?: string;
 }
 
 const create = async (classData: ICreateClass) => {
@@ -35,6 +37,17 @@ const create = async (classData: ICreateClass) => {
       status: classData.status,
       paid: classData.paid,
       client: { connect: { id: classData.clientId } },
+      realInstructor: !!classData.instructorId
+        ? { connect: { id: classData.instructorId } }
+        : undefined,
+    },
+    include: {
+      realInstructor: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -42,16 +55,30 @@ const create = async (classData: ICreateClass) => {
 };
 
 const update = async (classData: IUpdateClass) => {
+  let updateData = {
+    date: classData.date,
+    time: classData.time,
+    comment: classData.comment,
+    notified: classData.notified,
+    instructor: classData.instructor,
+    status: classData.status,
+    paid: classData.paid,
+  };
+
+  if (!!classData.instructorId) {
+    updateData["realInstructor"] = { connect: { id: classData.instructorId } };
+  }
+
   const result = await prisma.class.update({
     where: { id: classData.id },
-    data: {
-      date: classData.date,
-      time: classData.time,
-      comment: classData.comment,
-      notified: classData.notified,
-      instructor: classData.instructor,
-      status: classData.status,
-      paid: classData.paid,
+    data: updateData,
+    include: {
+      realInstructor: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -65,6 +92,12 @@ const getAll = async (paginationOptions: PaginationOptions) => {
       skip: paginationOptions.skip,
       take: paginationOptions.limit,
       include: {
+        realInstructor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         client: {
           select: {
             name: true,
@@ -116,6 +149,7 @@ const get = async (id: string) => {
     where: { id },
     include: {
       client: true,
+      realInstructor: true,
     },
   });
 

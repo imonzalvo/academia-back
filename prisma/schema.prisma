@@ -28,13 +28,14 @@ model UserAcademy {
   name      String
   username  String
   email     String?
-  salt      String
-  hash      String
+  salt      String?
+  hash      String?
   role      Role
   academy   Academy?  @relation(fields: [academyId], references: [id])
   academyId String?   @db.ObjectId
   createdAt DateTime? @default(now()) @map(name: "created_at")
   updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  Class     Class[]
 }
 
 enum Role {
@@ -106,18 +107,20 @@ enum Status {
 }
 
 model Class {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  date       DateTime
-  comment    String?
-  client     Client?   @relation(fields: [clientId], references: [id])
-  clientId   String?   @db.ObjectId
-  time       String?
-  notified   Boolean?
-  instructor String?
-  status     Status?   @default(PENDING)
-  paid       Boolean?  @default(false)
-  createdAt  DateTime? @default(now()) @map(name: "created_at")
-  updatedAt  DateTime? @updatedAt @map(name: "updated_at")
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  date             DateTime
+  comment          String?
+  client           Client?     @relation(fields: [clientId], references: [id])
+  clientId         String?     @db.ObjectId
+  realInstructor   UserAcademy? @relation(fields: [realInstructorId], references: [id])
+  realInstructorId String?     @db.ObjectId
+  time             String?
+  notified         Boolean?
+  instructor       String?
+  status           Status?     @default(PENDING)
+  paid             Boolean?    @default(false)
+  createdAt        DateTime?   @default(now()) @map(name: "created_at")
+  updatedAt        DateTime?   @updatedAt @map(name: "updated_at")
 }
 
 model Client {

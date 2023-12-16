@@ -79,6 +79,9 @@ const get = async (id: string): Promise<PopulatedClient> => {
         },
       },
       classes: {
+        include: {
+          realInstructor: true,
+        },
         orderBy: {
           date: "desc",
         },
