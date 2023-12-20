@@ -8,6 +8,7 @@ import classes from "./classes";
 import academies from "./academies";
 import analytics from "./analytics";
 import users from "./users";
+import calendar from "./calendar";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use("/", classes);
 router.use("/", analytics);
 router.use("/", academies);
 router.use("/", users);
+router.use("/", calendar);
 
 export default router;

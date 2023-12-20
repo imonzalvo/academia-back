@@ -1,6 +1,6 @@
 import { Status } from "@prisma/client";
 import prisma from "../lib/db";
-import { PaginationOptions } from "./types";
+import { DateRange, PaginationOptions } from "./types";
 
 export interface ICreateClass {
   clientId: string;
@@ -117,6 +117,35 @@ const getAll = async (paginationOptions: PaginationOptions) => {
   return { data: clients, total };
 };
 
+const getByDateRangeAndInstructor = async (
+  instructorId: string,
+  dateRange: DateRange
+) => {
+  const queryResult = await prisma.class.findMany({
+    where: {
+      realInstructorId: instructorId,
+      date: { gte: dateRange.from, lte: dateRange.to },
+    },
+    select: {
+      id: true,
+      date: true,
+      time: true,
+      status: true,
+      client: {
+        select: {
+          fullName: true,
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      date: "asc",
+    },
+  });
+
+  return queryResult;
+};
+
 const deleteClass = async (id: string) => {
   const result = await prisma.class.delete({
     where: { id },
@@ -163,4 +192,5 @@ export default {
   delete: deleteClass,
   getAll,
   getClassesByDate,
+  getByDateRangeAndInstructor,
 };

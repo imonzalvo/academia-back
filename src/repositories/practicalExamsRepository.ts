@@ -1,6 +1,6 @@
 import { Status } from "@prisma/client";
 import prisma from "../lib/db";
-import { PaginationOptions } from "./types";
+import { DateRange, PaginationOptions } from "./types";
 
 export interface ICreatePracticalExam {
   clientId: string;
