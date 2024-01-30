@@ -54,6 +54,7 @@ router.put(`/classes/:id`, async (req: Request, res: Response, next) => {
       status,
       paid,
       instructorId,
+      clientId
     } = req.body;
 
     const classData = {
@@ -66,6 +67,7 @@ router.put(`/classes/:id`, async (req: Request, res: Response, next) => {
       status,
       paid,
       instructorId,
+      clientId
     };
 
     const result = await classesService.update(classData, req.user);

@@ -8,9 +8,18 @@ router.post(
   async (req: Request, res: Response, next) => {
     const { id } = req.params;
 
-    const { date, paid, comment, notified, result, time, status } = req.body;
+    const {
+      date,
+      paid,
+      comment,
+      notified,
+      result,
+      time,
+      status,
+      instructorId,
+    } = req.body;
 
-    const newPayment = {
+    const newExam = {
       date,
       paid,
       comment,
@@ -19,10 +28,11 @@ router.post(
       time,
       status,
       clientId: id,
+      instructorId,
     };
 
     try {
-      const response = await practicalExamsService.create(newPayment);
+      const response = await practicalExamsService.create(newExam);
 
       res.json(response);
     } catch (e) {
@@ -33,7 +43,17 @@ router.post(
 
 router.put("/practical_exams/:id", async (req: Request, res: Response) => {
   const { id: examId } = req.params;
-  const { date, paid, comment, notified, result, time, status } = req.body;
+  const {
+    date,
+    paid,
+    comment,
+    notified,
+    result,
+    time,
+    status,
+    instructorId,
+    finalResult,
+  } = req.body;
 
   let basicData = {
     paid,
@@ -42,6 +62,7 @@ router.put("/practical_exams/:id", async (req: Request, res: Response) => {
     notified,
     time,
     status,
+    instructorId,
   };
   let updatedData;
 
@@ -59,11 +80,25 @@ router.put("/practical_exams/:id", async (req: Request, res: Response) => {
     };
   }
 
+  if (!!finalResult) {
+    updatedData = {
+      ...updatedData,
+      status: "DONE",
+      finalResult: {
+        create: {
+          street: finalResult.street,
+          circuit: finalResult.circuit,
+        },
+      },
+    };
+  }
+
   const response = await prisma.practicalExam.update({
     where: { id: examId },
     data: updatedData,
     include: {
       result: true,
+      finalResult: true,
     },
   });
 

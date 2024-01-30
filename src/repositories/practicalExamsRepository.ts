@@ -1,9 +1,11 @@
 import { Status } from "@prisma/client";
 import prisma from "../lib/db";
 import { DateRange, PaginationOptions } from "./types";
+import { addHours, subHours } from "date-fns";
 
 export interface ICreatePracticalExam {
   clientId: string;
+  instructorId: string;
   date: string;
   paid: boolean;
   comment: string;
@@ -44,6 +46,7 @@ const findNextExams = async (paginationOptions: PaginationOptions) => {
       },
       include: {
         result: true,
+        finalResult: true,
         client: {
           select: {
             name: true,
@@ -76,9 +79,11 @@ const create = async (newPracticalExam: ICreatePracticalExam) => {
         },
       },
       client: { connect: { id: newPracticalExam.clientId } },
+      realInstructor: { connect: { id: newPracticalExam.instructorId } },
     },
     include: {
       result: true,
+      finalResult: true
     },
   });
 
@@ -112,9 +117,71 @@ const getExamsByDate = async (academyId: string, from: Date, to: Date) => {
   return queryResult;
 };
 
+const isTimeSlotAvailable = async (range: DateRange, instructorId: string) => {
+  // Check if there exists a class starting less than 1hr
+  // before this slot OR starting less than an hour after this slot
+
+  const slotBefore = subHours(range.from, 1);
+  const slotAfter = addHours(range.from, 1);
+
+  const lessThan1HrBeforeClause = [
+    // Starting less than 1hr BEFORE this slot
+    {
+      date: {
+        gt: slotBefore,
+      },
+    },
+    {
+      date: {
+        lte: range.from,
+      },
+    },
+  ];
+
+  const lessThan1HrAfterClause = [
+    // Starting less than 1hr AFTER this slot
+    {
+      date: {
+        gt: range.from,
+      },
+    },
+    {
+      date: {
+        lt: slotAfter,
+      },
+    },
+  ];
+
+  const result = await prisma.practicalExam.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              AND: lessThan1HrBeforeClause,
+            },
+            {
+              AND: lessThan1HrAfterClause,
+            },
+          ],
+        },
+        {
+          realInstructorId: {
+            equals: instructorId,
+          },
+        },
+      ],
+    },
+  });
+  console.log("exam result", result)
+
+  return result && result.length == 0;
+};
+
 export default {
   create,
   findClientNext,
   findNextExams,
   getExamsByDate,
+  isTimeSlotAvailable,
 };

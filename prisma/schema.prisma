@@ -24,18 +24,19 @@ model Academy {
 }
 
 model UserAcademy {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  username  String
-  email     String?
-  salt      String?
-  hash      String?
-  role      Role
-  academy   Academy?  @relation(fields: [academyId], references: [id])
-  academyId String?   @db.ObjectId
-  createdAt DateTime? @default(now()) @map(name: "created_at")
-  updatedAt DateTime? @updatedAt @map(name: "updated_at")
-  Class     Class[]
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  username      String
+  email         String?
+  salt          String?
+  hash          String?
+  role          Role
+  academy       Academy?        @relation(fields: [academyId], references: [id])
+  academyId     String?         @db.ObjectId
+  createdAt     DateTime?       @default(now()) @map(name: "created_at")
+  updatedAt     DateTime?       @updatedAt @map(name: "updated_at")
+  Class         Class[]
+  PracticalExam PracticalExam[]
 }
 
 enum Role {
@@ -63,22 +64,33 @@ enum PaymentType {
 }
 
 model PracticalExam {
-  id           String              @id @default(auto()) @map("_id") @db.ObjectId
-  date         DateTime
-  comment      String?
-  paid         Boolean
-  time         String?
-  notified     Boolean
-  client       Client?             @relation(fields: [clientId], references: [id])
-  clientId     String?             @db.ObjectId
-  result       PracticalExamResult @relation(fields: [examResultId], references: [id])
-  createdAt    DateTime?           @default(now()) @map(name: "created_at")
-  updatedAt    DateTime?           @updatedAt @map(name: "updated_at")
-  examResultId String              @unique @db.ObjectId
-  status       Status?             @default(PENDING)
+  id                String                    @id @default(auto()) @map("_id") @db.ObjectId
+  date              DateTime
+  comment           String?
+  paid              Boolean
+  time              String?
+  notified          Boolean
+  client            Client?                   @relation(fields: [clientId], references: [id])
+  clientId          String?                   @db.ObjectId
+  result            PracticalExamResult       @relation(fields: [examResultId], references: [id])
+  finalResult       PracticalExamFinalResult? @relation(fields: [examFinalResultId], references: [id])
+  createdAt         DateTime?                 @default(now()) @map(name: "created_at")
+  updatedAt         DateTime?                 @updatedAt @map(name: "updated_at")
+  examResultId      String                    @unique @db.ObjectId
+  examFinalResultId String?                   @unique @db.ObjectId
+  status            Status?                   @default(PENDING)
+  realInstructor    UserAcademy?              @relation(fields: [realInstructorId], references: [id])
+  realInstructorId  String?                   @db.ObjectId
 }
 
 model PracticalExamResult {
+  id      String         @id @default(auto()) @map("_id") @db.ObjectId
+  street  Boolean
+  circuit Boolean
+  exam    PracticalExam?
+}
+
+model PracticalExamFinalResult {
   id      String         @id @default(auto()) @map("_id") @db.ObjectId
   street  Boolean
   circuit Boolean
@@ -107,20 +119,20 @@ enum Status {
 }
 
 model Class {
-  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
   date             DateTime
   comment          String?
-  client           Client?     @relation(fields: [clientId], references: [id])
-  clientId         String?     @db.ObjectId
+  client           Client?      @relation(fields: [clientId], references: [id])
+  clientId         String?      @db.ObjectId
   realInstructor   UserAcademy? @relation(fields: [realInstructorId], references: [id])
-  realInstructorId String?     @db.ObjectId
+  realInstructorId String?      @db.ObjectId
   time             String?
   notified         Boolean?
   instructor       String?
-  status           Status?     @default(PENDING)
-  paid             Boolean?    @default(false)
-  createdAt        DateTime?   @default(now()) @map(name: "created_at")
-  updatedAt        DateTime?   @updatedAt @map(name: "updated_at")
+  status           Status?      @default(PENDING)
+  paid             Boolean?     @default(false)
+  createdAt        DateTime?    @default(now()) @map(name: "created_at")
+  updatedAt        DateTime?    @updatedAt @map(name: "updated_at")
 }
 
 model Client {

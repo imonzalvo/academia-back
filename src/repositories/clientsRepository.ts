@@ -68,6 +68,7 @@ const get = async (id: string): Promise<PopulatedClient> => {
       practicalExams: {
         include: {
           result: true,
+          finalResult: true
         },
         orderBy: {
           date: "desc",
