@@ -11,13 +11,14 @@ import ValidationError from "../errors/validationError";
 import practicalExamsRepository from "../repositories/practicalExamsRepository";
 
 interface ClassTimeSlotValidator {
+  id?: string;
   date?: string;
   instructorId?: string;
 }
 
 const create = async (classData: ICreateClass, currentUser: UserAcademy) => {
   await clientsService.validateClientForUser(classData.clientId, currentUser);
-  await validateTimeSlotForClass(classData);
+  // await validateTimeSlotForClass(classData);
 
   const result = await classesRepository.create(classData);
 
@@ -26,9 +27,8 @@ const create = async (classData: ICreateClass, currentUser: UserAcademy) => {
 
 const update = async (classData: IUpdateClass, currentUser: UserAcademy) => {
   await validateClassForUser(classData.id, currentUser);
-  await validateTimeSlotForClass(classData);
+  // await validateTimeSlotForClass(classData);
 
-  console.log("class data", classData)
   const result = await classesRepository.update(classData);
 
   return result;
