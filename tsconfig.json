@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // Remove for local development
-    "module": "es6",
+    // "module": "es6",
     "target": "es5",
     "lib": [
       "dom",

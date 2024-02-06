@@ -62,13 +62,24 @@ router.put("/practical_exams/:id", async (req: Request, res: Response) => {
     notified,
     time,
     status,
-    instructorId,
   };
   let updatedData;
 
   if (!result) {
     updatedData = { ...basicData };
   } else {
+    updatedData = {
+      ...basicData,
+      result: {
+        create: {
+          street: result.street,
+          circuit: result.circuit,
+        },
+      },
+    };
+  }
+
+  if (instructorId) {
     updatedData = {
       ...basicData,
       result: {
