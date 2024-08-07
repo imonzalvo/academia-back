@@ -37,11 +37,14 @@ const get = async (id: string, currentUser) => {
     return new Date(exam.date) > new Date();
   })[0];
 
+  const classesPerInstructor = getClassesPerInstructor(client.classes);
+
   const populatedClient = {
     ...client,
     pendingPracticalExam,
     pendingTheoryExam,
     nextClass,
+    instructorsInfo: classesPerInstructor,
   };
 
   return populatedClient;
@@ -88,6 +91,21 @@ const validateClientForUser = async (
   if (client.academyId != currentUser.academyId) {
     throw new UnauthorizedError("Client does not belong to this academy");
   }
+};
+
+const getClassesPerInstructor = (classes: any) => {
+  return classes.reduce((acc, cls) => {
+    if (cls.realInstructor) {
+      const { id, name } = cls.realInstructor;
+      const existingInstructor = acc.find((instructor) => instructor.id === id);
+      if (existingInstructor) {
+        existingInstructor.classCount++;
+      } else {
+        acc.push({ id, name, classCount: 1 });
+      }
+    }
+    return acc;
+  }, [] as Array<{ id: string; name: string; classCount: number }>);
 };
 
 export default {

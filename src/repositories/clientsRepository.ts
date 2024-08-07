@@ -56,6 +56,11 @@ type PopulatedClient = Client & {
   classes: Class[];
   theoryExams: TheoryExam[];
   practicalExams: PracticalExam[];
+  instructorsInfo: Array<{
+    id: string;
+    name: string;
+    classCount: number;
+  }>;
 };
 
 const get = async (id: string): Promise<PopulatedClient> => {
@@ -81,7 +86,12 @@ const get = async (id: string): Promise<PopulatedClient> => {
       },
       classes: {
         include: {
-          realInstructor: true,
+          realInstructor: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
         orderBy: {
           date: "desc",
