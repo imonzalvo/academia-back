@@ -19,6 +19,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       secondaryPhone,
       status,
       knownUsBy,
+      expedientExpirationDate,
     } = req.body;
 
     const user = req.user;
@@ -35,6 +36,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       status,
       knownUsBy,
       academyId: user?.academyId,
+      expedientExpirationDate
     };
 
     const result = await clientsService.create(newClient);
@@ -58,6 +60,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       secondaryPhone,
       status,
       knownUsBy,
+      expedientExpirationDate
     } = req.body;
 
     const user = req.user;
@@ -74,6 +77,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       secondaryPhone,
       status,
       knownUsBy,
+      expedientExpirationDate,
       academyId: user?.academyId,
     };
 

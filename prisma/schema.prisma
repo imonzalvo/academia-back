@@ -77,7 +77,7 @@ model PracticalExam {
   createdAt         DateTime?                 @default(now()) @map(name: "created_at")
   updatedAt         DateTime?                 @updatedAt @map(name: "updated_at")
   examResultId      String                    @unique @db.ObjectId
-  examFinalResultId String?                   @unique @db.ObjectId
+  examFinalResultId String?                   @db.ObjectId
   status            Status?                   @default(PENDING)
   realInstructor    UserAcademy?              @relation(fields: [realInstructorId], references: [id])
   realInstructorId  String?                   @db.ObjectId
@@ -91,10 +91,10 @@ model PracticalExamResult {
 }
 
 model PracticalExamFinalResult {
-  id      String         @id @default(auto()) @map("_id") @db.ObjectId
+  id      String          @id @default(auto()) @map("_id") @db.ObjectId
   street  Boolean
   circuit Boolean
-  exam    PracticalExam?
+  exams   PracticalExam[]
 }
 
 model TheoryExam {
@@ -136,26 +136,27 @@ model Class {
 }
 
 model Client {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  lastName       String?
-  fullName       String?
-  email          String?
-  address        String
-  ci             String
-  phone          String
-  secondaryPhone String?
-  notes          String?
-  createdAt      DateTime        @default(now()) @map(name: "created_at")
-  updatedAt      DateTime        @updatedAt @map(name: "updated_at")
-  academyId      String?         @db.ObjectId
-  academy        Academy?        @relation(fields: [academyId], references: [id])
-  payments       Payment[]
-  practicalExams PracticalExam[]
-  theoryExams    TheoryExam[]
-  classes        Class[]
-  status         ClientStatus?   @default(ACTIVE)
-  knownUsBy      knownUsBy?
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  lastName                String?
+  fullName                String?
+  email                   String?
+  address                 String
+  ci                      String
+  phone                   String
+  secondaryPhone          String?
+  notes                   String?
+  expedientExpirationDate DateTime?
+  createdAt               DateTime        @default(now()) @map(name: "created_at")
+  updatedAt               DateTime        @updatedAt @map(name: "updated_at")
+  academyId               String?         @db.ObjectId
+  academy                 Academy?        @relation(fields: [academyId], references: [id])
+  payments                Payment[]
+  practicalExams          PracticalExam[]
+  theoryExams             TheoryExam[]
+  classes                 Class[]
+  status                  ClientStatus?   @default(ACTIVE)
+  knownUsBy               knownUsBy?
 
   @@map(name: "clients")
 }

@@ -23,6 +23,7 @@ export interface ICreateClient {
   academyId?: string;
   status: "DONE" | "ACTIVE" | "INACTIVE";
   knownUsBy: knownUsBy;
+  expedientExpirationDate: string;
 }
 
 interface ClientSearch {
@@ -45,6 +46,7 @@ const create = async (newClient: ICreateClient) => {
       status: newClient.status,
       knownUsBy: newClient.knownUsBy,
       academy: { connect: { id: newClient.academyId } },
+      expedientExpirationDate: newClient.expedientExpirationDate,
       fullName,
     },
   });
@@ -73,7 +75,7 @@ const get = async (id: string): Promise<PopulatedClient> => {
       practicalExams: {
         include: {
           result: true,
-          finalResult: true
+          finalResult: true,
         },
         orderBy: {
           date: "desc",
@@ -119,6 +121,7 @@ const update = async (updatedClient: Partial<ICreateClient>) => {
       secondaryPhone: updatedClient.secondaryPhone,
       knownUsBy: updatedClient.knownUsBy,
       status: updatedClient.status,
+      expedientExpirationDate: updatedClient.expedientExpirationDate,
       fullName,
     },
   });
