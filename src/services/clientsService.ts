@@ -71,13 +71,15 @@ const getClients = async (
   skip: number,
   limit: number,
   search: string,
-  status: string
+  status: string,
+  orderBy: string
 ) => {
   return await clientsRepository.search(
     academyId,
     { skip, limit },
     search,
-    status as ClientStatus
+    status as ClientStatus,
+    orderBy
   );
 };
 

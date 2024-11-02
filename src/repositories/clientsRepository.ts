@@ -57,8 +57,8 @@ const create = async (newClient: ICreateClient) => {
 type PopulatedClient = Client & {
   classes: Class[];
   theoryExams: TheoryExam[];
-  practicalExams: PracticalExam[];
-  instructorsInfo: Array<{
+  practicalExams?: PracticalExam[];
+  instructorsInfo?: Array<{
     id: string;
     name: string;
     classCount: number;
@@ -162,7 +162,8 @@ const search = async (
   academyId: string,
   paginationOptions: PaginationOptions,
   search: string | undefined,
-  status: ClientStatus | undefined
+  status: ClientStatus | undefined,
+  orderBy: string | undefined
 ) => {
   const searchConditionsConjunction = [];
 
@@ -200,9 +201,35 @@ const search = async (
     searchConditionsConjunction.push(statusCientClause);
   }
 
+  if (orderBy === "EXPEDIENT_EXPIRATION") {
+    const expedientExpirationDateClause = {
+      expedientExpirationDate: {
+        gte: new Date(),
+      },
+      practicalExams: {
+        none: {
+          finalResult: {
+            street: true,
+            circuit: true,
+          },
+        },
+      },
+    };
+    searchConditionsConjunction.push(expedientExpirationDateClause);
+  }
+
   const whereClause = {
     AND: searchConditionsConjunction,
   };
+
+  const orderByClause: Prisma.ClientOrderByWithRelationInput =
+    orderBy === "EXPEDIENT_EXPIRATION"
+      ? {
+          expedientExpirationDate: "asc",
+        }
+      : {
+          createdAt: "desc",
+        };
 
   const queryResult = await prisma.$transaction([
     prisma.client.count({
@@ -212,9 +239,7 @@ const search = async (
       where: whereClause,
       skip: paginationOptions.skip,
       take: paginationOptions.limit,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: orderByClause,
     }),
   ]);
 

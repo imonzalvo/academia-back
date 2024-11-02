@@ -36,7 +36,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       status,
       knownUsBy,
       academyId: user?.academyId,
-      expedientExpirationDate
+      expedientExpirationDate,
     };
 
     const result = await clientsService.create(newClient);
@@ -60,7 +60,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       secondaryPhone,
       status,
       knownUsBy,
-      expedientExpirationDate
+      expedientExpirationDate,
     } = req.body;
 
     const user = req.user;
@@ -97,10 +97,15 @@ router.delete(`/clients/:id`, async (req: Request, res: Response) => {
 });
 
 router.get(`/clients`, async (req: Request, res: Response) => {
-  const { skip, limit, search, status } = req.query;
+  const { skip, limit, search, status, orderBy } = req.query;
 
   if (!!status && !["ACTIVE", "INACTIVE", "DONE"].includes(status as string)) {
     res.status(400).json({ error: "Invalid status" });
+    return;
+  }
+
+  if (!!orderBy && !["EXPEDIENT_EXPIRATION", "CREATED_AT"].includes(orderBy as string)) {
+    res.status(400).json({ error: "Invalid orderBy" });
     return;
   }
 
@@ -114,7 +119,8 @@ router.get(`/clients`, async (req: Request, res: Response) => {
     skipNumber,
     limitNumber,
     search as string,
-    status as string
+    status as string,
+    orderBy as string
   );
 
   res.json(clients);
