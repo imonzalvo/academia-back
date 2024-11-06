@@ -206,13 +206,8 @@ const search = async (
       expedientExpirationDate: {
         gte: new Date(),
       },
-      practicalExams: {
-        none: {
-          finalResult: {
-            street: true,
-            circuit: true,
-          },
-        },
+      status: {
+        in: ["ACTIVE" as ClientStatus, "INACTIVE" as ClientStatus],
       },
     };
     searchConditionsConjunction.push(expedientExpirationDateClause);
