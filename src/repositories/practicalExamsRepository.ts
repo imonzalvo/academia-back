@@ -5,7 +5,7 @@ import { addHours, subHours } from "date-fns";
 
 export interface ICreatePracticalExam {
   clientId: string;
-  instructorId: string;
+  instructorId: string | null;
   date: string;
   paid: boolean;
   comment: string;
@@ -79,7 +79,9 @@ const create = async (newPracticalExam: ICreatePracticalExam) => {
         },
       },
       client: { connect: { id: newPracticalExam.clientId } },
-      realInstructor: { connect: { id: newPracticalExam.instructorId } },
+      ...(newPracticalExam.instructorId
+        ? { realInstructor: { connect: { id: newPracticalExam.instructorId } } }
+        : {}),
     },
     include: {
       result: true,
