@@ -11,16 +11,20 @@ datasource db {
 }
 
 model Academy {
-  id        String        @id @default(auto()) @map("_id") @db.ObjectId
-  name      String?
-  phone     String?
-  email     String?
-  address   String?
-  handle    String
-  createdAt DateTime?     @default(now()) @map(name: "created_at")
-  updatedAt DateTime?     @updatedAt @map(name: "updated_at")
-  users     UserAcademy[]
-  clients   Client[]
+  id                         String         @id @default(auto()) @map("_id") @db.ObjectId
+  name                       String?
+  phone                      String?
+  email                      String?
+  address                    String?
+  handle                     String
+  createdAt                  DateTime?      @default(now()) @map(name: "created_at")
+  updatedAt                  DateTime?      @updatedAt @map(name: "updated_at")
+  notificationsEnabled          Boolean?
+  notificationMinutesInAdvance  Int?        @default(1440)
+  contactPhone                  String?
+  contactWhatsApp               String?
+  users                      UserAcademy[]
+  clients                    Client[]
 }
 
 model UserAcademy {
@@ -120,20 +124,22 @@ enum Status {
 }
 
 model Class {
-  id               String       @id @default(auto()) @map("_id") @db.ObjectId
-  date             DateTime
-  comment          String?
-  client           Client?      @relation(fields: [clientId], references: [id])
-  clientId         String?      @db.ObjectId
-  realInstructor   UserAcademy? @relation(fields: [realInstructorId], references: [id])
-  realInstructorId String?      @db.ObjectId
-  time             String?
-  notified         Boolean?
-  instructor       String?
-  status           Status?      @default(PENDING)
-  paid             Boolean?     @default(false)
-  createdAt        DateTime?    @default(now()) @map(name: "created_at")
-  updatedAt        DateTime?    @updatedAt @map(name: "updated_at")
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  date                 DateTime
+  comment              String?
+  client               Client?        @relation(fields: [clientId], references: [id])
+  clientId             String?        @db.ObjectId
+  realInstructor       UserAcademy?   @relation(fields: [realInstructorId], references: [id])
+  realInstructorId     String?        @db.ObjectId
+  time                 String?
+  notified             Boolean?
+  notificationEnabled  Boolean?
+  instructor           String?
+  status               Status?        @default(PENDING)
+  paid                 Boolean?       @default(false)
+  createdAt            DateTime?      @default(now()) @map(name: "created_at")
+  updatedAt            DateTime?      @updatedAt @map(name: "updated_at")
+  notifications        Notification[]
 }
 
 model Client {
@@ -156,8 +162,10 @@ model Client {
   practicalExams          PracticalExam[]
   theoryExams             TheoryExam[]
   classes                 Class[]
+  notifications           Notification[]
   status                  ClientStatus?   @default(ACTIVE)
   knownUsBy               knownUsBy?
+  notificationsEnabled    Boolean?
 
   @@map(name: "clients")
 }
@@ -222,6 +230,25 @@ model User {
   sessions      Session[]
 
   @@map(name: "users")
+}
+
+enum NotificationStatus {
+  SENT
+  FAILED
+}
+
+model Notification {
+  id        String             @id @default(auto()) @map("_id") @db.ObjectId
+  class     Class              @relation(fields: [classId], references: [id])
+  classId   String             @db.ObjectId
+  client    Client             @relation(fields: [clientId], references: [id])
+  clientId  String             @db.ObjectId
+  phone     String
+  message   String
+  status    NotificationStatus
+  errorMsg  String?
+  sentAt    DateTime
+  createdAt DateTime           @default(now()) @map(name: "created_at")
 }
 
 model VerificationToken {

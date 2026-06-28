@@ -5,6 +5,7 @@ import passport from "passport";
 import auth from "./routes/auth";
 import jwtPassport from "./lib/passport";
 import { UserAcademy } from "@prisma/client";
+import { runNotificationJob } from "./jobs/notificationJob";
 
 const app: Express = express();
 app.use(function (req, res, next) {
@@ -42,6 +43,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/", auth);
 
+// QStash trigger — outside JWT auth
+app.post("/notifications/trigger", async (req, res) => {
+  try {
+    await runNotificationJob();
+    res.json({ ok: true });
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
 const authMiddleware = (req, res, next) => {
   if (req.method !== "OPTIONS") {
     passport.authenticate(
@@ -70,9 +81,11 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send(err);
 });
 
-const server = app.listen(3000, () =>
+const PORT = process.env.PORT || 4000;
+const server = app.listen(PORT, () => {
   console.log(`
-🚀 Server ready at: http://localhost:3000
+🚀 Server ready at: http://localhost:${PORT}
 DB: ${process.env.DATABASE_URL}
-⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api`)
-);
+⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api`);
+  console.log("Notification job: using QStash (no local cron)");
+});

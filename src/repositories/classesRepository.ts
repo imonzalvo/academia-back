@@ -293,6 +293,34 @@ const get = async (id: string) => {
   return result;
 };
 
+const getClassesPendingNotification = async (
+  academyId: string,
+  from: Date,
+  to: Date
+) => {
+  return prisma.class.findMany({
+    where: {
+      status: "PENDING",
+      notificationEnabled: true,
+      notified: { not: true },
+      date: { gte: from, lte: to },
+      client: {
+        academyId,
+        notificationsEnabled: { not: false },
+      },
+    },
+    include: {
+      client: {
+        select: {
+          id: true,
+          fullName: true,
+          phone: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   create,
   update,
@@ -302,4 +330,5 @@ export default {
   getClassesByDate,
   getByDateRangeAndInstructor,
   isTimeSlotAvailable,
+  getClassesPendingNotification,
 };

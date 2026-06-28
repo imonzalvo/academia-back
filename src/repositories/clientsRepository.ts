@@ -24,6 +24,7 @@ export interface ICreateClient {
   status: "DONE" | "ACTIVE" | "INACTIVE";
   knownUsBy: knownUsBy;
   expedientExpirationDate: string;
+  notificationsEnabled?: boolean;
 }
 
 interface ClientSearch {
@@ -47,6 +48,7 @@ const create = async (newClient: ICreateClient) => {
       knownUsBy: newClient.knownUsBy,
       academy: { connect: { id: newClient.academyId } },
       expedientExpirationDate: newClient.expedientExpirationDate,
+      notificationsEnabled: newClient.notificationsEnabled,
       fullName,
     },
   });
@@ -122,6 +124,7 @@ const update = async (updatedClient: Partial<ICreateClient>) => {
       knownUsBy: updatedClient.knownUsBy,
       status: updatedClient.status,
       expedientExpirationDate: updatedClient.expedientExpirationDate,
+      notificationsEnabled: updatedClient.notificationsEnabled,
       fullName,
     },
   });

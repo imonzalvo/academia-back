@@ -5,6 +5,7 @@ import {
   ICreateAcademy,
   IUpdateAcademy,
 } from "../repositories/academyRepository";
+import academyRepository from "../repositories/academyRepository";
 import { UserAcademy } from "@prisma/client";
 
 const router = Router();
@@ -31,10 +32,25 @@ router.post(`/academies`, async (req: Request, res: Response) => {
   }
 });
 
+router.get(`/academies/me`, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as UserAcademy;
+    if (!user.academyId) return res.sendStatus(401);
+    const academy = await academyRepository.getById(user.academyId);
+    if (!academy) return res.sendStatus(404);
+    res.json({
+      ...academy,
+      notificationMinutesInAdvance: academy.notificationMinutesInAdvance ?? 1440,
+    });
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
 router.put(`/academies/:id`, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, notificationMinutesInAdvance } = req.body;
 
     const user = req.user as UserAcademy;
 
@@ -48,6 +64,7 @@ router.put(`/academies/:id`, async (req: Request, res: Response) => {
       email,
       phone,
       address,
+      notificationMinutesInAdvance,
     };
 
     const result = await academiesServices.update(updatedAcademy);
@@ -83,6 +100,44 @@ router.get(`/academies/instructors`, async (req: Request, res: Response) => {
     const user = req.user as UserAcademy;
 
     const result = await academiesServices.getInstructors(user.academyId);
+    res.json(result);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+router.get("/academies/notification-config", async (req: Request, res: Response) => {
+  try {
+    const user = req.user as UserAcademy;
+    if (!user.academyId) return res.sendStatus(401);
+
+    const academies = await academyRepository.getAll();
+    const found = academies.find((a) => a.id === user.academyId);
+    if (!found) return res.sendStatus(404);
+
+    res.json({
+      notificationsEnabled: found.notificationsEnabled,
+      contactPhone: found.contactPhone ?? "",
+      contactWhatsApp: found.contactWhatsApp ?? "",
+    });
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+router.put("/academies/notification-config", async (req: Request, res: Response) => {
+  try {
+    const user = req.user as UserAcademy;
+    if (!user.academyId || user.role !== "ADMIN") return res.sendStatus(401);
+
+    const { notificationsEnabled, contactPhone, contactWhatsApp } = req.body;
+
+    const result = await academyRepository.updateNotificationConfig(user.academyId, {
+      notificationsEnabled,
+      contactPhone,
+      contactWhatsApp,
+    });
+
     res.json(result);
   } catch (e) {
     res.sendStatus(500);

@@ -15,6 +15,7 @@ export interface IUpdateAcademy {
   email?: string;
   phone?: string;
   address?: string;
+  notificationMinutesInAdvance?: number;
 }
 
 export interface ICreateInstructor {
@@ -44,9 +45,24 @@ const update = async (academy: IUpdateAcademy) => {
       address: academy.address,
       phone: academy.phone,
       email: academy.email,
+      notificationMinutesInAdvance: academy.notificationMinutesInAdvance,
     },
   });
   return result;
+};
+
+const getById = async (id: string) => {
+  return prisma.academy.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      email: true,
+      address: true,
+      notificationMinutesInAdvance: true,
+    },
+  });
 };
 
 const createInstructor = async (
@@ -76,9 +92,38 @@ const getInstructors = async (academyId: string) => {
   return newInstructor;
 };
 
+const getAll = async () => {
+  return prisma.academy.findMany({
+    select: {
+      id: true,
+      notificationsEnabled: true,
+      notificationMinutesInAdvance: true,
+      contactPhone: true,
+      contactWhatsApp: true,
+    },
+  });
+};
+
+const updateNotificationConfig = async (
+  id: string,
+  config: {
+    notificationsEnabled?: boolean;
+    contactPhone?: string;
+    contactWhatsApp?: string;
+  }
+) => {
+  return prisma.academy.update({
+    where: { id },
+    data: config,
+  });
+};
+
 export default {
   create,
   update,
+  getById,
   createInstructor,
-  getInstructors
+  getInstructors,
+  getAll,
+  updateNotificationConfig,
 };

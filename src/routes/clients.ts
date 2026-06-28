@@ -20,6 +20,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       status,
       knownUsBy,
       expedientExpirationDate,
+      notificationsEnabled,
     } = req.body;
 
     const user = req.user;
@@ -37,6 +38,7 @@ router.post(`/clients`, async (req: Request, res: Response) => {
       knownUsBy,
       academyId: user?.academyId,
       expedientExpirationDate,
+      notificationsEnabled,
     };
 
     const result = await clientsService.create(newClient);
@@ -61,6 +63,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       status,
       knownUsBy,
       expedientExpirationDate,
+      notificationsEnabled,
     } = req.body;
 
     const user = req.user;
@@ -78,6 +81,7 @@ router.put(`/clients/:id`, async (req: Request, res: Response) => {
       status,
       knownUsBy,
       expedientExpirationDate,
+      notificationsEnabled,
       academyId: user?.academyId,
     };
 
