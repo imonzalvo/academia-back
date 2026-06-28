@@ -81,7 +81,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send(err);
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`
 🚀 Server ready at: http://localhost:${PORT}
