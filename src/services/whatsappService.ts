@@ -32,12 +32,21 @@ export const sendWhatsAppMessage = async (
       }),
     });
 
+    const responseBody = await response.json().catch(() => null);
+
     if (!response.ok) {
-      const error = await response.json();
-      return { success: false, errorMsg: error?.error?.message ?? `HTTP ${response.status}` };
+      console.error(
+        `[WhatsApp] sendWhatsAppMessage falló para ${normalizedPhone} (phoneNumberId=${phoneNumberId}): HTTP ${response.status} ${JSON.stringify(responseBody)}`
+      );
+      return { success: false, errorMsg: responseBody?.error?.message ?? `HTTP ${response.status}` };
     }
+
+    console.log(
+      `[WhatsApp] sendWhatsAppMessage OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${responseBody?.messages?.[0]?.id}`
+    );
     return { success: true };
   } catch (err: any) {
+    console.error(`[WhatsApp] sendWhatsAppMessage excepción para ${normalizedPhone}:`, err);
     return { success: false, errorMsg: err?.message ?? "Error desconocido" };
   }
 };
@@ -94,12 +103,21 @@ export const sendWhatsAppTemplate = async (
       }),
     });
 
+    const responseBody = await response.json().catch(() => null);
+
     if (!response.ok) {
-      const error = await response.json();
-      return { success: false, errorMsg: error?.error?.message ?? `HTTP ${response.status}` };
+      console.error(
+        `[WhatsApp] sendWhatsAppTemplate (${templateName}/${templateLanguage}) falló para ${normalizedPhone} (phoneNumberId=${phoneNumberId}): HTTP ${response.status} ${JSON.stringify(responseBody)}`
+      );
+      return { success: false, errorMsg: responseBody?.error?.message ?? `HTTP ${response.status}` };
     }
+
+    console.log(
+      `[WhatsApp] sendWhatsAppTemplate (${templateName}/${templateLanguage}) OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${responseBody?.messages?.[0]?.id}`
+    );
     return { success: true };
   } catch (err: any) {
+    console.error(`[WhatsApp] sendWhatsAppTemplate excepción para ${normalizedPhone}:`, err);
     return { success: false, errorMsg: err?.message ?? "Error desconocido" };
   }
 };

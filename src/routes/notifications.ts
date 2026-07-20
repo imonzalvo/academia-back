@@ -40,8 +40,10 @@ router.post("/notifications/test", async (req: Request, res: Response) => {
     );
 
     const { success, errorMsg } = await sendWhatsAppMessage(phone, message);
+    console.log(`[Notifications] /notifications/test para ${phone}: success=${success}${errorMsg ? ` errorMsg=${errorMsg}` : ""}`);
     res.json({ success, errorMsg, message });
   } catch (e) {
+    console.error("[Notifications] /notifications/test excepción:", e);
     res.sendStatus(500);
   }
 });
