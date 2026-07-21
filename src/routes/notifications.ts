@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
 import { NotificationStatus, UserAcademy } from "@prisma/client";
 import notificationsRepository from "../repositories/notificationsRepository";
-import { buildMessage } from "../jobs/notificationJob";
-import { sendWhatsAppMessage } from "../services/whatsappService";
+import { buildMessage, buildTemplateParams } from "../jobs/notificationJob";
+import { sendWhatsAppTemplate } from "../services/whatsappService";
+import academyRepository from "../repositories/academyRepository";
 
 const router = Router();
 
@@ -30,17 +31,27 @@ router.get("/notifications", async (req: Request, res: Response) => {
 
 router.post("/notifications/test", async (req: Request, res: Response) => {
   try {
+    const user = req.user as UserAcademy;
     const { phone, clientName } = req.body;
     if (!phone) return res.status(400).json({ error: "phone requerido" });
 
-    const message = buildMessage(
-      clientName ?? "Alumno de prueba",
-      new Date(Date.now() + 30 * 60 * 1000), // simulamos clase en 30 min
-      "10:00"
+    const academies = await academyRepository.getAll();
+    const academy = academies.find((a) => a.id === user.academyId);
+    if (!academy) return res.sendStatus(404);
+
+    const classDate = new Date(Date.now() + 30 * 60 * 1000); // simulamos clase en 30 min
+    const name = clientName ?? "Alumno de prueba";
+    const message = buildMessage(name, classDate, "10:00");
+    const params = buildTemplateParams(
+      name,
+      classDate,
+      "10:00",
+      academy.contactPhone ?? "",
+      academy.contactWhatsApp ?? ""
     );
 
-    const { success, errorMsg } = await sendWhatsAppMessage(phone, message);
-    console.log(`[Notifications] /notifications/test para ${phone}: success=${success}${errorMsg ? ` errorMsg=${errorMsg}` : ""}`);
+    const { success, errorMsg } = await sendWhatsAppTemplate(phone, params);
+    console.log(`[Notifications] /notifications/test (template) para ${phone}: success=${success}${errorMsg ? ` errorMsg=${errorMsg}` : ""}`);
     res.json({ success, errorMsg, message });
   } catch (e) {
     console.error("[Notifications] /notifications/test excepción:", e);

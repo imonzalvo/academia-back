@@ -7,7 +7,7 @@ import prisma from "../lib/db";
 
 const getFirstName = (fullName: string): string => fullName.trim().split(/\s+/)[0] ?? fullName;
 
-const buildTemplateParams = (
+export const buildTemplateParams = (
   clientName: string,
   classDate: Date,
   classTime: string | null | undefined,
