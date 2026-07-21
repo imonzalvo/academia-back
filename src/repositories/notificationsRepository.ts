@@ -9,10 +9,21 @@ export interface ICreateNotification {
   status: NotificationStatus;
   errorMsg?: string;
   sentAt: Date;
+  messageId?: string;
 }
 
 const create = async (data: ICreateNotification) => {
   return prisma.notification.create({ data });
+};
+
+const updateDeliveryStatusByMessageId = async (
+  messageId: string,
+  data: { deliveryStatus: string; deliveryError?: string; deliveredAt?: Date; readAt?: Date }
+) => {
+  return prisma.notification.updateMany({
+    where: { messageId },
+    data,
+  });
 };
 
 const getByAcademy = async (
@@ -44,4 +55,4 @@ const getByAcademy = async (
   });
 };
 
-export default { create, getByAcademy };
+export default { create, getByAcademy, updateDeliveryStatusByMessageId };

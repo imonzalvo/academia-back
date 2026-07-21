@@ -6,6 +6,7 @@ import auth from "./routes/auth";
 import jwtPassport from "./lib/passport";
 import { UserAcademy } from "@prisma/client";
 import { runNotificationJob } from "./jobs/notificationJob";
+import whatsappWebhook from "./routes/whatsappWebhook";
 
 const app: Express = express();
 app.use(function (req, res, next) {
@@ -52,6 +53,9 @@ app.post("/notifications/trigger", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+// Meta status callbacks — outside JWT auth
+app.use("/", whatsappWebhook);
 
 const authMiddleware = (req, res, next) => {
   if (req.method !== "OPTIONS") {

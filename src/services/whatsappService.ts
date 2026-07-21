@@ -9,7 +9,7 @@ const getCredentials = () => ({
 export const sendWhatsAppMessage = async (
   phone: string,
   message: string
-): Promise<{ success: boolean; errorMsg?: string }> => {
+): Promise<{ success: boolean; errorMsg?: string; messageId?: string }> => {
   const { token, phoneNumberId } = getCredentials();
   if (!token || !phoneNumberId) {
     return { success: false, errorMsg: "WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados" };
@@ -41,10 +41,11 @@ export const sendWhatsAppMessage = async (
       return { success: false, errorMsg: responseBody?.error?.message ?? `HTTP ${response.status}` };
     }
 
+    const messageId = responseBody?.messages?.[0]?.id;
     console.log(
-      `[WhatsApp] sendWhatsAppMessage OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${responseBody?.messages?.[0]?.id}`
+      `[WhatsApp] sendWhatsAppMessage OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${messageId}`
     );
-    return { success: true };
+    return { success: true, messageId };
   } catch (err: any) {
     console.error(`[WhatsApp] sendWhatsAppMessage excepción para ${normalizedPhone}:`, err);
     return { success: false, errorMsg: err?.message ?? "Error desconocido" };
@@ -63,7 +64,7 @@ export interface ITemplateParams {
 export const sendWhatsAppTemplate = async (
   phone: string,
   params: ITemplateParams
-): Promise<{ success: boolean; errorMsg?: string }> => {
+): Promise<{ success: boolean; errorMsg?: string; messageId?: string }> => {
   const { token, phoneNumberId } = getCredentials();
   if (!token || !phoneNumberId) {
     return { success: false, errorMsg: "WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID no configurados" };
@@ -112,10 +113,11 @@ export const sendWhatsAppTemplate = async (
       return { success: false, errorMsg: responseBody?.error?.message ?? `HTTP ${response.status}` };
     }
 
+    const messageId = responseBody?.messages?.[0]?.id;
     console.log(
-      `[WhatsApp] sendWhatsAppTemplate (${templateName}/${templateLanguage}) OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${responseBody?.messages?.[0]?.id}`
+      `[WhatsApp] sendWhatsAppTemplate (${templateName}/${templateLanguage}) OK para ${normalizedPhone} (phoneNumberId=${phoneNumberId}), messageId=${messageId}`
     );
-    return { success: true };
+    return { success: true, messageId };
   } catch (err: any) {
     console.error(`[WhatsApp] sendWhatsAppTemplate excepción para ${normalizedPhone}:`, err);
     return { success: false, errorMsg: err?.message ?? "Error desconocido" };

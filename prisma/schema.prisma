@@ -238,17 +238,22 @@ enum NotificationStatus {
 }
 
 model Notification {
-  id        String             @id @default(auto()) @map("_id") @db.ObjectId
-  class     Class              @relation(fields: [classId], references: [id])
-  classId   String             @db.ObjectId
-  client    Client             @relation(fields: [clientId], references: [id])
-  clientId  String             @db.ObjectId
-  phone     String
-  message   String
-  status    NotificationStatus
-  errorMsg  String?
-  sentAt    DateTime
-  createdAt DateTime           @default(now()) @map(name: "created_at")
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  class          Class              @relation(fields: [classId], references: [id])
+  classId        String             @db.ObjectId
+  client         Client             @relation(fields: [clientId], references: [id])
+  clientId       String             @db.ObjectId
+  phone          String
+  message        String
+  status         NotificationStatus
+  errorMsg       String?
+  sentAt         DateTime
+  createdAt      DateTime           @default(now()) @map(name: "created_at")
+  messageId      String?
+  deliveryStatus String?
+  deliveryError  String?
+  deliveredAt    DateTime?
+  readAt         DateTime?
 }
 
 model VerificationToken {

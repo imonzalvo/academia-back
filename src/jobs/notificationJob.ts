@@ -71,7 +71,7 @@ export const runNotificationJob = async () => {
 
       const targetPhone = process.env.WHATSAPP_TEST_RECIPIENT ?? cls.client.phone;
 
-      const { success, errorMsg } = await sendWhatsAppTemplate(targetPhone, params);
+      const { success, errorMsg, messageId } = await sendWhatsAppTemplate(targetPhone, params);
 
       const messagePreview = `Hola ${params.firstName} 👋\n📅 ${params.date} a las ${params.time}hs`;
 
@@ -83,6 +83,7 @@ export const runNotificationJob = async () => {
         status: success ? "SENT" : "FAILED",
         errorMsg,
         sentAt: new Date(),
+        messageId,
       });
 
       if (success) {
