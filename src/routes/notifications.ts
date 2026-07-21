@@ -46,8 +46,8 @@ router.post("/notifications/test", async (req: Request, res: Response) => {
       name,
       classDate,
       "10:00",
-      academy.contactPhone ?? "",
-      academy.contactWhatsApp ?? ""
+      academy.contactPhone || "24812413",
+      academy.contactWhatsApp || "59895979419"
     );
 
     const { success, errorMsg } = await sendWhatsAppTemplate(phone, params);
